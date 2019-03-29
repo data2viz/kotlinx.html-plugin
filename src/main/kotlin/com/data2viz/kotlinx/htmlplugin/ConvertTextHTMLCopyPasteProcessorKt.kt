@@ -18,25 +18,25 @@ import com.intellij.psi.impl.source.html.HtmlFileImpl
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 import java.util.ArrayList
+import com.intellij.compiler.progress.CompilerTask.getTextRange
+
+
 
 class ConvertTextHTMLCopyPasteProcessorKt {
+    private val converter = HtmlToKotlinConverter()
+
     fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): MutableList<TextBlockTransferableData> {
-        LOGGER.warn("collectTransferableData");
+
 
         val resultList = ArrayList<TextBlockTransferableData>()
 
-        if (file is HtmlFileImpl) {
+        val isHtmlFile = file is HtmlFileImpl
 
-            val fileName = file.name
-
-            val fileText = file.text
-
-            val htmlTextSelection = HtmlTextSelection(fileName, fileText, startOffsets, endOffsets, true)
-
-
+        LOGGER.warn("collectTransferableData isHtmlFile=$isHtmlFile");
+        if (isHtmlFile) {
+            val htmlTextSelection = HtmlTextTransferableData(file.name, file.text, startOffsets, endOffsets, true)
             resultList.add(htmlTextSelection)
         }
-
 
         return resultList
 
@@ -44,91 +44,147 @@ class ConvertTextHTMLCopyPasteProcessorKt {
 
     fun extractTransferableData(content: Transferable): MutableList<TextBlockTransferableData>? {
 
-        val result = ArrayList<TextBlockTransferableData>()
 
-        try {
-            val dataFlavor = ConvertTextHTMLCopyPasteProcessorKt.dataFlavor
-            val isCopyFromHtmlFile = content.isDataFlavorSupported(dataFlavor)
-            if (isCopyFromHtmlFile) {
-                val `object` = content.getTransferData(dataFlavor) as TextBlockTransferableData
+        val result = mutableListOf<TextBlockTransferableData>()
 
+        val dataFlavor = ConvertTextHTMLCopyPasteProcessorKt.dataFlavor
+        val isCopyFromHtmlFile = content.isDataFlavorSupported(dataFlavor)
 
-                result.add(`object`)
+        LOGGER.warn("extractTransferableData isCopyFromHtmlFile=$isCopyFromHtmlFile")
+        if (isCopyFromHtmlFile) {
+            val transferableData = content.getTransferData(dataFlavor) as TextBlockTransferableData
+            result.add(transferableData)
 
-            } else {
-                val isNotCopyPasteFromIDeaFile = !content.isDataFlavorSupported(CaretStateTransferableData.FLAVOR)
-                val isSomeStringContent = content.isDataFlavorSupported(DataFlavor.stringFlavor)
-                if (isNotCopyPasteFromIDeaFile && isSomeStringContent) {
-                    val `object` = content.getTransferData(DataFlavor.stringFlavor)
+        } else {
 
-                    val str = `object` as String
-                    val external = HtmlTextSelection("external", str, intArrayOf(0), intArrayOf(str.length), false)
-                    result.add(external)
+            val isNotCopyPasteFromIdeaFile = !content.isDataFlavorSupported(CaretStateTransferableData.FLAVOR)
+            val isSomeStringContent = content.isDataFlavorSupported(DataFlavor.stringFlavor)
 
-                }
+            LOGGER.warn("extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile");
+            LOGGER.warn("extractTransferableData isSomeStringContent=$isSomeStringContent");
+            if (isNotCopyPasteFromIdeaFile && isSomeStringContent) {
+                val transferableData = content.getTransferData(DataFlavor.stringFlavor)
+
+                val str = transferableData as String
+                val startOffsets = intArrayOf(0)
+                val endOffsets = intArrayOf(str.length)
+                val fromHtmlFile = false
+                val external = HtmlTextTransferableData("external", str, startOffsets, endOffsets, fromHtmlFile)
+                result.add(external)
+
             }
-
-        } catch (e: Throwable) {
-            // empty catch block
-
         }
 
+        LOGGER.warn("extractTransferableData result.size=${result.size}");
         return result
     }
 
-    fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, values: MutableList<TextBlockTransferableData>) {
-        if (DumbService.getInstance(project).isDumb) {
-            return
-        }
-        val targetFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document) ?: return
+    fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, textValues: MutableList<TextBlockTransferableData>) {
 
-        if (values.size != 1) {
-            throw RuntimeException("")
+        val isDump = DumbService.getInstance(project).isDumb
+        LOGGER.warn("processTransferableData isDump=$isDump");
+        if (isDump) {
+            return
         }
 
-        val value = values[0] as? HtmlTextSelection ?: return
-        var psiFile: PsiFile? = PsiFileFactory.getInstance(project).createFileFromText(value.fileName, HTMLLanguage.INSTANCE, value.fileText)
-        if (psiFile !is HtmlFileImpl) {
-            psiFile = null
-        }
-        if (psiFile == null) {
+
+        val psiDocumentManager = PsiDocumentManager.getInstance(project)
+        val targetPsiFile = psiDocumentManager.getPsiFile(editor.document)
+        LOGGER.warn("processTransferableData targetPsiFile=$targetPsiFile");
+
+        if (targetPsiFile == null) {
             return
         }
-        val sourceFile = psiFile as HtmlFileImpl
-        if (!value.isFromHtmlFile() && !HtmlToKotlinConverterKt.looksLikeHtml(sourceFile)) {
+
+
+        val textValuesSize = textValues.size
+
+        LOGGER.warn("processTransferableData textValuesSize=$textValuesSize");
+        if (textValuesSize != 1) {
             return
         }
-        if (!KotlinPasteFromHtmlDialog.isOK(project)) {
+        val textBlockTransferableData = textValues[0]
+
+        LOGGER.warn("processTransferableData textBlockTransferableData=$textBlockTransferableData");
+
+        if (textBlockTransferableData !is HtmlTextTransferableData) {
             return
         }
-        val text = this.convertCopiedCodeToKotlin(value, sourceFile)
-        if (text != null && !text.isEmpty()) {
+        val htmlTextTransferableData = textBlockTransferableData
+
+
+        val psiFileFactory = PsiFileFactory.getInstance(project)
+        val sourcePsiFileFromText: PsiFile = psiFileFactory.createFileFromText(htmlTextTransferableData.fileName, HTMLLanguage.INSTANCE, htmlTextTransferableData.fileText)
+        LOGGER.warn("processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText")
+        if (sourcePsiFileFromText !is HtmlFileImpl) {
+            return
+        }
+
+        val isFromHtmlFile = htmlTextTransferableData.isFromHtmlFile
+        LOGGER.warn("processTransferableData isFromHtmlFile=$isFromHtmlFile")
+
+        if (!isFromHtmlFile) {
+            val looksLikeHtml = HtmlToKotlinConverterKt.looksLikeHtml(sourcePsiFileFromText)
+            LOGGER.warn("processTransferableData looksLikeHtml=$looksLikeHtml")
+            if (!looksLikeHtml) {
+                return
+            }
+        }
+
+
+        val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
+        LOGGER.warn("processTransferableData dialogIsOk=$dialogIsOk");
+        if (!dialogIsOk) {
+            return
+        }
+        val convertedToKotlinText = convertCopiedCodeToKotlin(htmlTextTransferableData, sourcePsiFileFromText)
+
+        val notEmpty = convertedToKotlinText.isNotEmpty()
+        LOGGER.warn("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText");
+        if (notEmpty) {
             val application = ApplicationManager.getApplication()
 
-            application.runWriteAction(Run(bounds, editor, text, project, targetFile))
+            application.runWriteAction {
+
+                LOGGER.warn("processTransferableData runWriteAction")
+                val startOffset = bounds.startOffset
+                editor.document.replaceString(bounds.startOffset, bounds.endOffset, convertedToKotlinText)
+                val endOffsetAfterCopy = startOffset + convertedToKotlinText.length
+                editor.caretModel.moveToOffset(endOffsetAfterCopy)
+                val codeStyleManager = com.intellij.psi.codeStyle.CodeStyleManager.getInstance(project)
+
+                codeStyleManager.reformatText(targetPsiFile, startOffset, endOffsetAfterCopy)
+                PsiDocumentManager.getInstance(targetPsiFile.project).commitDocument(editor.document)
+            }
+
         }
     }
 
 
-    private fun convertRangeToKotlin(file: HtmlFileImpl, range: TextRange, converter: HtmlToKotlinConverter): String {
+    private fun convertRangeToKotlin(file: HtmlFileImpl, range: TextRange): String {
         val result = StringBuilder()
         var currentRange = range
         val string = file.text
 
+        LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
+
         while (!currentRange.isEmpty) {
+            LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
             val leafElement = findFirstLeafElementWhollyInRange(file, currentRange)
+
+            LOGGER.warn("convertRangeToKotlin leafElement=${leafElement}")
             if (leafElement == null) {
-                //                String unconvertedSuffix = StringsKt.substring((String) fileText, (int) currentRange.getStartOffset(), (int) currentRange.getEndOffset());
+
                 val unconvertedSuffix = string.substring(currentRange.startOffset, currentRange.endOffset)
 
                 result.append(unconvertedSuffix)
                 break
             }
             val elementToConvert = findTopMostParentWhollyInRange(currentRange, leafElement)
-            val unconvertedPrefix = substring(string as String, currentRange.startOffset, elementToConvert.textRange.startOffset)
+            val unconvertedPrefix = string.substring(currentRange.startOffset, elementToConvert!!.textRange.startOffset)
             result.append(unconvertedPrefix)
             val converted = converter.convertElement(elementToConvert)
-            if (isNotEmpty(converted)) {
+            if (converted.isNullOrEmpty()) {
                 result.append(converted)
             } else {
                 result.append(elementToConvert.text)
@@ -140,96 +196,103 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         return result.toString()
     }
 
-    private fun substring(fileText: String, startOffset: Int, endOffest: Int): String {
-        return fileText.substring(startOffset, endOffest)
-    }
-
-    private fun isNotEmpty(converted: String?): Boolean {
-        return converted != null && !converted.isEmpty()
-    }
 
     private fun findFirstLeafElementWhollyInRange(file: HtmlFileImpl, range: TextRange): PsiElement? {
-        var i = range.startOffset
-        while (i < range.endOffset) {
-            val element = file.findElementAt(i)
+
+        var result: PsiElement? = null
+
+
+        val startOffset = range.startOffset
+        val endOffset = range.endOffset
+
+        LOGGER.warn("findFirstLeafElementWhollyInRange startOffset=${startOffset} endOffset=${endOffset}")
+        var currentOffset = range.startOffset
+        while (startOffset < endOffset) {
+            LOGGER.warn("findFirstLeafElementWhollyInRange currentOffset=${currentOffset}")
+
+            val element = file.findElementAt(currentOffset)
             if (element == null) {
-                ++i
+                currentOffset++
                 continue
             }
+
             val elemRange = element.textRange
             if (!range.contains(elemRange)) {
-                i = elemRange.endOffset
+                currentOffset = elemRange.endOffset
                 continue
             }
-            return element
+
+            result = element
+            break
         }
-        return null
+        return result
     }
 
-    private fun findTopMostParentWhollyInRange(range: TextRange, base: PsiElement): PsiElement {
+    private fun findTopMostParentWhollyInRange(range: TextRange, base: PsiElement): PsiElement? {
 
 
-        var needContinue = true
-        do {
+        if (!range.contains(base.textRange)) {
 
-            val parent = base.parent
-            if (parent is PsiJavaFile) {
-                needContinue = range.contains(parent.getTextRange())
+            AssertionError("Base element out of range. Range: " + range  + ", element: " + base.text + ", element's range: " + base.textRange + ".")
+        }
+
+
+        var current = base
+        var result: PsiElement? = current
+
+
+        while (current.parent != null) {
+            if (current is PsiJavaFile) {
+                val fileTextRange = current.getTextRange()
+                val contains = range.contains(fileTextRange)
+                if (contains) {
+                    result = current
+                    break
+                }
             }
+            current = current.parent
+        }
 
-        } while (needContinue)
+        LOGGER.warn("findTopMostParentWhollyInRange result=$result")
 
-
-        return base
+        return result
     }
 
 
-    private fun convertCopiedCodeToKotlin(code: HtmlTextSelection, fileCopiedFrom: HtmlFileImpl): String {
+    private fun convertCopiedCodeToKotlin(code: HtmlTextTransferableData, fileCopiedFrom: HtmlFileImpl): String {
 
-        val n: Int
-        val converter = HtmlToKotlinConverter()
+        val sb = StringBuilder()
+
         val startOffsets = code.startOffsets
         val endOffsets = code.endOffsets
 
-        val result = StringBuilder()
-
-        val startIndex = 0
-        val lastIndex = startOffsets.size - 1
-
-        val lastIndexMessage = startOffsets[lastIndex]
-
-        val message = startOffsets[startIndex]
-        var i = 0
-        n = lastIndexMessage
-        if (message <= n) {
-            // ???
-            do {
-                val startOffset = startOffsets[++i]
-                val endOffset = endOffsets[i]
-                result.append(this.convertRangeToKotlin(fileCopiedFrom, TextRange(startOffset, endOffset), converter))
-            } while (i != n)
+        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.size = ${startOffsets.size} endOffsets.size = ${endOffsets.size}")
+        if (startOffsets.size != endOffsets.size) {
+            throw  Exception("should be same size")
         }
 
-        return StringUtil.convertLineSeparators(result.toString())
-    }
 
-    inner class Run(internal val `$bounds`: RangeMarker, internal val `$editor`: Editor, internal val `$text`: String, internal val `$project`: Project, internal val `$targetFile`: PsiFile) : Runnable {
-
-        override fun run() {
-            val startOffset = `$bounds`.startOffset
-            `$editor`.document.replaceString(`$bounds`.startOffset, `$bounds`.endOffset, `$text` as CharSequence)
-            val endOffsetAfterCopy = startOffset + `$text`.length
-            `$editor`.caretModel.moveToOffset(endOffsetAfterCopy)
-            val codeStyleManager = com.intellij.psi.codeStyle.CodeStyleManager.getInstance(`$project`)
-
-            codeStyleManager.reformatText(`$targetFile`, startOffset, endOffsetAfterCopy)
-            PsiDocumentManager.getInstance(`$targetFile`.project).commitDocument(`$editor`.document)
+        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.first()= ${startOffsets.first()} startOffsets.last() = ${startOffsets.last()}")
+        if (startOffsets.first() < startOffsets.last()) {
+            throw  Exception("start offset first should be lower than last")
         }
 
+        for (i in startOffsets.indices) {
+            val startOffset = startOffsets[i]
+            val endOffset = endOffsets[i]
+            val convertRangeToKotlin = convertRangeToKotlin(fileCopiedFrom, TextRange(startOffset, endOffset))
+            sb.append(convertRangeToKotlin)
+        }
+
+        val sbResult = sb.toString()
+        val result = StringUtil.convertLineSeparators(sbResult)
+        LOGGER.warn("convertCopiedCodeToKotlin result=$result")
+        return result
     }
+
 
     companion object {
-        var dataFlavor: DataFlavor = DataFlavor(ConvertTextHTMLCopyPasteProcessor::class.java, "class: com.data2viz.kotlinx.htmlplugin.ConvertTextHTMLCopyPasteProcessor");
+        var dataFlavor: DataFlavor = DataFlavor(ConvertTextHTMLCopyPasteProcessor::class.java, "class: com.data2viz.kotlinx.htmlplugin.ConvertTextHTMLCopyPasteProcessor")
         private val LOGGER = Logger.getInstance(ConvertTextHTMLCopyPasteProcessorKt::class.java)
     }
 }

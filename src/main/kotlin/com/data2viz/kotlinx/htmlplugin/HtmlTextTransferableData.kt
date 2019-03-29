@@ -5,7 +5,7 @@ import com.intellij.codeInsight.editorActions.TextBlockTransferableData
 import java.awt.datatransfer.DataFlavor
 
 
-class HtmlTextSelection(val fileName: String, val fileText: String, val startOffsets: IntArray, val endOffsets: IntArray, val fromHtmlFile: Boolean) : TextBlockTransferableData {
+class HtmlTextTransferableData(val fileName: String, val fileText: String, val startOffsets: IntArray, val endOffsets: IntArray, val isFromHtmlFile: Boolean) : TextBlockTransferableData {
 
     override fun getFlavor(): DataFlavor {
         return ConvertTextHTMLCopyPasteProcessorKt.dataFlavor;
@@ -23,7 +23,4 @@ class HtmlTextSelection(val fileName: String, val fileText: String, val startOff
         return index
     }
 
-    fun isFromHtmlFile(): Boolean {
-        return this.fromHtmlFile
-    }
 }

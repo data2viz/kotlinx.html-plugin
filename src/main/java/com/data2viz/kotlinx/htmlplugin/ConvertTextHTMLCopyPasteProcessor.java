@@ -34,18 +34,21 @@ public class ConvertTextHTMLCopyPasteProcessor extends CopyPastePostProcessor<Te
 
 
     @NotNull
+    @Override
     public List<TextBlockTransferableData> extractTransferableData(Transferable content) {
         return processorKt.extractTransferableData(content);
 
     }
 
     @NotNull
+    @Override
     public List<TextBlockTransferableData> collectTransferableData(PsiFile file, Editor editor, int[] startOffsets, int[] endOffsets) {
 
         return processorKt.collectTransferableData(file, editor, startOffsets, endOffsets);
 
     }
 
+    @Override
     public void processTransferableData(Project project, Editor editor, RangeMarker bounds, int caretOffset, Ref<Boolean> indented, List<TextBlockTransferableData> values) {
 
         processorKt.processTransferableData(project, editor, bounds, caretOffset, indented, values);

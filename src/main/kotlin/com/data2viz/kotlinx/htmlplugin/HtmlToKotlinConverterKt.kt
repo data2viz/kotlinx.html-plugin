@@ -18,56 +18,66 @@
  */
 package com.data2viz.kotlinx.htmlplugin
 
-import com.intellij.lang.Language
 import com.intellij.lang.html.HTMLLanguage
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.PsiWhiteSpace
+import com.intellij.psi.impl.source.html.HtmlDocumentImpl
+import com.intellij.psi.impl.source.html.HtmlFileImpl
+import com.intellij.psi.impl.source.html.HtmlLikeFile
 import com.intellij.psi.xml.XmlDoctype
 import com.intellij.psi.xml.XmlTag
 
-import java.util.ArrayList
-
 
 object HtmlToKotlinConverterKt {
-    /*
-     * WARNING - void declaration
-     */
-    fun startsWithXmlElement(psiElement: PsiElement): Boolean {
+    private val LOGGER = Logger.getInstance(HtmlToKotlinConverterKt::class.java)
 
-        if (psiElement is XmlTag) {
-            return true
-        }
-        if (psiElement is XmlDoctype) {
-            return true
-        }
-        val children = psiElement.children
 
-        val destination = ArrayList<PsiElement>()
-        for (i in children.indices) {
-            val element = children[i]
+    fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
-            if (element is PsiWhiteSpace) {
-                continue
+        LOGGER.warn("isStartsWithXmlElement type $psiElement")
+
+        val isStartsWithXmlElement: Boolean
+        when (psiElement) {
+
+            is XmlTag, is XmlDoctype, is HtmlFileImpl-> isStartsWithXmlElement = true
+
+            else -> {
+                val destination = mutableListOf<PsiElement>()
+
+                val children = psiElement.children
+                for (child in children) {
+
+                    if (child is PsiWhiteSpace) {
+                        continue
+                    }
+
+                    if (child.textLength < 0) {
+                        continue
+                    }
+
+                    destination.add(child)
+                }
+
+                if (destination.isEmpty()) {
+                    isStartsWithXmlElement = false
+                } else {
+                    isStartsWithXmlElement = isStartsWithXmlElement(destination[0])
+                }
             }
-
-            if (element.textLength < 0) {
-                continue
-            }
-
-            destination.add(element)
-
         }
-        return if (destination.isEmpty()) {
-            false
-        } else HtmlToKotlinConverterKt.startsWithXmlElement(destination[0])
+
+        LOGGER.warn("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
+
+        return isStartsWithXmlElement
     }
 
     fun looksLikeHtml(psiFile: PsiFile): Boolean {
 
-        return HtmlToKotlinConverterKt.startsWithXmlElement(psiFile)
+        return isStartsWithXmlElement(psiFile)
     }
 
     fun looksLikeHtml(text: String, project: Project): Boolean {
