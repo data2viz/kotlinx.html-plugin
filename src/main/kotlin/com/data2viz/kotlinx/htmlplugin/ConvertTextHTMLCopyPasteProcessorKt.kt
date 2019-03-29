@@ -1,23 +1,18 @@
 package com.data2viz.kotlinx.htmlplugin
 
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
-import com.intellij.lang.Language
 import com.intellij.lang.html.HTMLLanguage
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.CaretStateTransferableData
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.RangeMarker
-import com.intellij.openapi.project.DumbService
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Ref
 import com.intellij.openapi.util.TextRange
-import com.intellij.openapi.util.text.StringUtil
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.PsiFile
-import com.intellij.psi.PsiFileFactory
-import com.intellij.psi.PsiJavaFile
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.util.text.StringUtil
+import com.intellij.psi.*
 import com.intellij.psi.impl.source.html.HtmlFileImpl
 
 import java.awt.datatransfer.DataFlavor
@@ -82,7 +77,36 @@ class ConvertTextHTMLCopyPasteProcessorKt {
     }
 
     fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, values: MutableList<TextBlockTransferableData>) {
+        if (DumbService.getInstance(project).isDumb) {
+            return
+        }
+        val targetFile = PsiDocumentManager.getInstance(project).getPsiFile(editor.document) ?: return
 
+        if (values.size != 1) {
+            throw RuntimeException("")
+        }
+
+        val value = values[0] as? HtmlTextSelection ?: return
+        var psiFile: PsiFile? = PsiFileFactory.getInstance(project).createFileFromText(value.fileName, HTMLLanguage.INSTANCE, value.fileText)
+        if (psiFile !is HtmlFileImpl) {
+            psiFile = null
+        }
+        if (psiFile == null) {
+            return
+        }
+        val sourceFile = psiFile as HtmlFileImpl
+        if (!value.isFromHtmlFile() && !HtmlToKotlinConverterKt.looksLikeHtml(sourceFile)) {
+            return
+        }
+        if (!KotlinPasteFromHtmlDialog.isOK(project)) {
+            return
+        }
+        val text = this.convertCopiedCodeToKotlin(value, sourceFile)
+        if (text != null && !text.isEmpty()) {
+            val application = ApplicationManager.getApplication()
+
+            application.runWriteAction(Run(bounds, editor, text, project, targetFile))
+        }
     }
 
 
@@ -143,19 +167,51 @@ class ConvertTextHTMLCopyPasteProcessorKt {
     }
 
     private fun findTopMostParentWhollyInRange(range: TextRange, base: PsiElement): PsiElement {
-//        var parent: PsiElement
-//        //        boolean value = range.contains(base.getTextRange());
-//        //        if (PreconditionsKt.getASSERTIONS_ENABLED() && !value) {
-//        //            String message = "Base element out of range. Range: " + (Object) range + ", element: " + base.getText() + ", element's range: " + (Object) base.getTextRange() + ".";
-//        //            throw (Throwable) ((Object) new AssertionError((Object) message));
-//        //        }
-        var elem = base
-//        while ((parent = elem.parent) != null && parent !is PsiJavaFile && !(range.contains(parent.textRange) xor true)) {
-//            elem = parent
-//        }
-        return elem
+
+
+        var needContinue = true
+        do {
+
+            val parent = base.parent
+            if (parent is PsiJavaFile) {
+                needContinue = range.contains(parent.getTextRange())
+            }
+
+        } while (needContinue)
+
+
+        return base
     }
 
+
+    private fun convertCopiedCodeToKotlin(code: HtmlTextSelection, fileCopiedFrom: HtmlFileImpl): String {
+
+        val n: Int
+        val converter = HtmlToKotlinConverter()
+        val startOffsets = code.startOffsets
+        val endOffsets = code.endOffsets
+
+        val result = StringBuilder()
+
+        val startIndex = 0
+        val lastIndex = startOffsets.size - 1
+
+        val lastIndexMessage = startOffsets[lastIndex]
+
+        val message = startOffsets[startIndex]
+        var i = 0
+        n = lastIndexMessage
+        if (message <= n) {
+            // ???
+            do {
+                val startOffset = startOffsets[++i]
+                val endOffset = endOffsets[i]
+                result.append(this.convertRangeToKotlin(fileCopiedFrom, TextRange(startOffset, endOffset), converter))
+            } while (i != n)
+        }
+
+        return StringUtil.convertLineSeparators(result.toString())
+    }
 
     inner class Run(internal val `$bounds`: RangeMarker, internal val `$editor`: Editor, internal val `$text`: String, internal val `$project`: Project, internal val `$targetFile`: PsiFile) : Runnable {
 
