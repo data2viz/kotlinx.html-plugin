@@ -94,13 +94,8 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
 fun HtmlText.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
 
-
     sb.addTabIndent(currentIndent)
     sb.append("+ \"$text\"")
-    // add newline only if it is not inline body
-    if(currentIndent > 0) {
-        sb.append("\n")
-    }
 
     return sb.toString()
 }

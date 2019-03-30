@@ -1,6 +1,6 @@
 div {
-    + "Text "
-    b { +"bold" }
-    + " and "
-    i { +"italic" }
+    + "Text"
+    b { + "bold"}
+    + "and"
+    i { + "italic"}
 }
