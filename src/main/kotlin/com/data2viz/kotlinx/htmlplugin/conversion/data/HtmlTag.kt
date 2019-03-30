@@ -1,10 +1,8 @@
 package com.data2viz.kotlinx.htmlplugin.conversion.data
 
-class HtmlTag(val name: String) {
+class HtmlTag(val name: String): HtmlElement {
 
     val attributes: MutableList<HtmlAttribute> = mutableListOf()
-    val children: MutableList<HtmlTag> = mutableListOf()
-    var body: String? = null
-
+    val children: MutableList<HtmlElement> = mutableListOf()
 
 }

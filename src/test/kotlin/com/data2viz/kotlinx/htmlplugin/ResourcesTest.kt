@@ -1,5 +1,6 @@
 package com.data2viz.kotlinx.htmlplugin
 
+import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
 import com.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
 import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
@@ -27,7 +28,7 @@ import java.io.PrintStream
 open class ResourcesTest : LightPlatform4TestCase() {
 
 
-    protected fun loadHtmlData(filenameHtml: String): List<HtmlTag> {
+    protected fun loadHtmlData(filenameHtml: String): List<HtmlElement> {
 
         val htmlText = loadFileText(filenameHtml)
 

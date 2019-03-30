@@ -1,15 +1,12 @@
 package com.data2viz.kotlinx.htmlplugin.ide.controller
 
 import com.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import com.data2viz.kotlinx.htmlplugin.conversion.model.toHtmlTags
+import com.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
 import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.ui.Messages
-import org.jdom.filter2.Filters.document
-import com.sun.javafx.scene.CameraHelper.project
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
@@ -47,7 +44,7 @@ open class ConvertHTMLToKotlinXActionKx : AnAction("Convert HTML To KotlinX") {
             return
         }
 
-        val htmlTags = sourcePsiFileFromText.toHtmlTags()
+        val htmlTags = sourcePsiFileFromText.converToHtmlElements()
 
         val convertedToKotlinText = htmlTags.toKotlinX()
 

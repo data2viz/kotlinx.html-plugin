@@ -2,16 +2,30 @@ package com.data2viz.kotlinx.htmlplugin.conversion.model
 
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
+import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
+import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
 import java.lang.StringBuilder
 
 
+val INDENT = "    " // 4 spaces
+
 fun StringBuilder.addTabIndent(currentIndent: Int) {
     for (i in 1..currentIndent) {
-//        append("\t")
-        // 4 spaces indent
-        append("    ")
+        append(INDENT)
     }
 }
+
+fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
+
+    return when (this) {
+        is HtmlTag -> toKotlinX(currentIndent)
+        is HtmlText -> toKotlinX(currentIndent)
+        else -> {
+            throw AssertionError("${this.javaClass.typeName} not supported")
+        }
+    }
+}
+
 
 fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
@@ -21,14 +35,8 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
 
 
     for (attribute in attributes) {
-        sb.addTabIndent(currentIndent+1)
+        sb.addTabIndent(currentIndent + 1)
         sb.append(attribute.toKotlinX())
-        sb.append("\n")
-    }
-
-    if(!body.isNullOrEmpty()) {
-        sb.addTabIndent(currentIndent+1)
-        sb.append("+ \"$body\"")
         sb.append("\n")
     }
 
@@ -42,7 +50,20 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     return sb.toString()
 }
 
-fun Collection<HtmlTag>.toKotlinX(currentIndent: Int = 0): String {
+
+fun HtmlText.toKotlinX(currentIndent: Int = 0): String {
+    val sb = StringBuilder();
+
+
+    sb.addTabIndent(currentIndent)
+    sb.append("+ \"$text\"")
+    sb.append("\n")
+
+    return sb.toString()
+}
+
+
+fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
     val last = last();
