@@ -144,7 +144,7 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
             sb.append("${htmlTag.toKotlinX(currentIndent)}")
 
             if (htmlTag != last) {
-                sb.append("\n}")
+                sb.append("\n")
             }
         }
     }
