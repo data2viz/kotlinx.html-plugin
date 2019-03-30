@@ -17,12 +17,12 @@ fun HtmlTag.toKotlinX(): String {
     }
 
     body?.let {
-        sb.append("+ \"${convertBody(it)}\"")
+        sb.append("+ \"$it\"")
         sb.append("\n")
     }
 
     for (child in children) {
-        sb.append(child)
+        sb.append(child.toKotlinX())
         sb.append("\n")
     }
     sb.append("}\n")
@@ -44,10 +44,3 @@ fun HtmlAttribute.toKotlinX(): String {
     return result
 }
 
-private fun convertBody(text: String): String {
-    if (text.contains("\n") || text.contains("\"")) {
-        return "\"" + "\"" + "\"" + text + "\"" + "\"" + "\""
-    } else {
-        return "\"" + text + "\""
-    }
-}
