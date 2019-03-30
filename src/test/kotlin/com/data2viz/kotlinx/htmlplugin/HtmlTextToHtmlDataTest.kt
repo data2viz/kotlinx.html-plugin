@@ -1,28 +1,9 @@
 package com.data2viz.kotlinx.htmlplugin
 
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import com.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
-import com.intellij.ide.highlighter.ProjectFileType
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.project.impl.ProjectImpl
-import com.intellij.openapi.util.io.FileUtil
-import com.intellij.openapi.vfs.LocalFileSystem
-import com.intellij.testFramework.LightPlatform4TestCase
-import com.intellij.testFramework.LightPlatformTestCase
-import com.intellij.testFramework.PlatformTestCase
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
-import com.intellij.testFramework.fixtures.LightPlatformCodeInsightFixtureTestCase
-import org.jetbrains.annotations.NonNls
+import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
 import org.junit.Assert
-import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
-import java.io.ByteArrayOutputStream
-
-import java.io.File
-import java.io.PrintStream
 
 class HtmlTextToHtmlDataTest : ResourcesTest() {
 
@@ -34,8 +15,8 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
         Assert.assertEquals(1, htmlTags.size)
 
 
-        htmlTags[0].apply {
-            Assert.assertEquals("div", name)
+        (htmlTags[0] as HtmlTag).apply {
+            Assert.assertEquals("div", tagName)
         }
 
     }
@@ -47,14 +28,14 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
         Assert.assertEquals(1, htmlTags.size)
 
         (htmlTags[0] as HtmlTag).apply {
-            Assert.assertEquals("div", name)
+            Assert.assertEquals("div", tagName)
             Assert.assertEquals(2, attributes.size)
             attributes[0].apply {
-                Assert.assertEquals("attr1", name)
+                Assert.assertEquals("attr1", attrName)
                 Assert.assertEquals(null, value)
             }
             attributes[1].apply {
-                Assert.assertEquals("attr2", name)
+                Assert.assertEquals("attr2", attrName)
                 Assert.assertEquals("value2", value)
             }
 
@@ -71,17 +52,43 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
 
 
         (htmlTags[0] as HtmlTag).apply {
-            Assert.assertEquals("div", name)
+            Assert.assertEquals("div", tagName)
             Assert.assertEquals(1, children.size)
             (children[0] as HtmlTag).apply {
-                Assert.assertEquals("div", name)
+                Assert.assertEquals("div", tagName)
             }
 
         }
 
+    }
+
+    @Test
+    fun fileHtmlToHtmlDataNestedSeveralChilds() {
+        val htmlTags = loadHtmlData("nested_several_text_childs.html")
+
+        Assert.assertEquals(1, htmlTags.size)
+
+
         (htmlTags[0] as HtmlTag).apply {
-            Assert.assertEquals("div", name)
+            Assert.assertEquals("div", tagName)
+            Assert.assertEquals(4, children.size)
+            (children[0] as HtmlText).apply {
+                Assert.assertEquals("Text", text)
+            }
+            (children[1] as HtmlTag).apply {
+                Assert.assertEquals("b", tagName)
+            }
+
+            (children[2] as HtmlText).apply {
+                Assert.assertEquals("and", text)
+            }
+
+            (children[3] as HtmlTag).apply {
+                Assert.assertEquals("i", tagName)
+            }
+
         }
+
 
     }
 

@@ -75,7 +75,10 @@ object HtmlPsiToHtmlDataConverter {
             }
 
             is XmlText -> {
-                htmlElement = HtmlText(psiElement.text.trim())
+                val text = psiElement.text.trim()
+                if (text.isNotEmpty()) {
+                    htmlElement = HtmlText(text)
+                }
             }
 
         }

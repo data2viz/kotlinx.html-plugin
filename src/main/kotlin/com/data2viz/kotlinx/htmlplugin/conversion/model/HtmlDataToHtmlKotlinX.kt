@@ -47,7 +47,7 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
 
     sb.addTabIndent(currentIndent)
-    sb.append("$name")
+    sb.append("$tagName")
 
 
     val attributesSize = attributes.size
@@ -128,9 +128,9 @@ fun HtmlAttribute.toKotlinX(): String {
     val result: String
 
     // remap for kotlinx
-    val attrName = when (name) {
+    val attrName = when (attrName) {
         "class" -> "classes"
-        else -> name
+        else -> attrName
     }
 
     if (value != null) {
