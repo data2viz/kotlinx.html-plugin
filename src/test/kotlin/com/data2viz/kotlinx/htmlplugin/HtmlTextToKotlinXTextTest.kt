@@ -15,6 +15,11 @@ class HtmlTextToKotlinXTextTest: ResourcesTest() {
     }
 
     @Test
+    fun FileHtmlToKotlinXAttrsBase() {
+        assertFiles("attrs_base.html", "attrs_base.htmlkotlinx")
+    }
+
+    @Test
     fun FileHtmlToKotlinXNested() {
         assertFiles("nested.html", "nested.htmlkotlinx")
     }

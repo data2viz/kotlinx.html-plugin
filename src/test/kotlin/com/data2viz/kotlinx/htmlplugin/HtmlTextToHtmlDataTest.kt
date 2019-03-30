@@ -41,6 +41,29 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
     }
 
     @Test
+    fun fileHtmlToHtmlDataAttrsBase() {
+        val htmlTags = loadHtmlData("attrs_base.html")
+
+        Assert.assertEquals(1, htmlTags.size)
+
+        htmlTags[0].apply {
+            Assert.assertEquals("div", name)
+            Assert.assertEquals(2, attributes.size)
+            attributes[0].apply {
+                Assert.assertEquals("attr1", name)
+                Assert.assertEquals(null, value)
+            }
+            attributes[1].apply {
+                Assert.assertEquals("attr2", name)
+                Assert.assertEquals("value2", value)
+            }
+
+
+        }
+
+    }
+
+    @Test
     fun fileHtmlToHtmlDataNested() {
         val htmlTags = loadHtmlData("nested.html")
 

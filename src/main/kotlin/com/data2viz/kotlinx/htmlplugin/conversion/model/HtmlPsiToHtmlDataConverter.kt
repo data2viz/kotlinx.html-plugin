@@ -59,12 +59,6 @@ object HtmlPsiToHtmlDataConverter {
 
                 htmlTag = HtmlTag(psiElement.name)
 
-                for (attribute in psiElement.attributes) {
-                    val htmlAttribute = convertAttribute(attribute);
-                    htmlTag.attributes.add(htmlAttribute)
-
-                }
-
                 for (childPsi in psiElement.children) {
                     val childHtmlTag = convertPsiElementToHtmlTag(childPsi, htmlTag);
                     if (childHtmlTag != null) {
