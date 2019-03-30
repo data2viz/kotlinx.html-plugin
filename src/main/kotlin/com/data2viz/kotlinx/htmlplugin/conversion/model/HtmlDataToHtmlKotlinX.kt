@@ -25,7 +25,23 @@ fun HtmlTag.toKotlinX(): String {
         sb.append(child.toKotlinX())
         sb.append("\n")
     }
-    sb.append("}\n")
+    sb.append("}")
+
+    return sb.toString()
+}
+
+fun Collection<HtmlTag>.toKotlinX(): String {
+    val sb = StringBuilder()
+
+    val last = last();
+    for (htmlTag in this) {
+
+        sb.append("${htmlTag.toKotlinX()}")
+
+        if (htmlTag != last) {
+            sb.append("\n}")
+        }
+    }
 
     return sb.toString()
 }

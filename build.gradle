@@ -14,9 +14,6 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     jcenter()
-    flatDir {
-        dirs 'libs'
-    }
 }
 
 
@@ -27,8 +24,6 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
     compile fileTree(dir: 'libs', include: '*.jar')
-
-    testImplementation 'junit:junit:4.12'
 
 }
 

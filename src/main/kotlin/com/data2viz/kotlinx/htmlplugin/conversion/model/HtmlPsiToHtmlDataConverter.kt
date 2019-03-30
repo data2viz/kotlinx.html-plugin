@@ -7,6 +7,8 @@ import com.intellij.lang.html.HTMLLanguage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.PsiFileImpl
+import com.intellij.psi.impl.source.html.HtmlDocumentImpl
 import com.intellij.psi.impl.source.html.HtmlFileImpl
 import com.intellij.psi.xml.XmlAttribute
 import com.intellij.psi.xml.XmlDoctype
@@ -19,11 +21,36 @@ object HtmlPsiToHtmlDataConverter {
     private val LOGGER = Logger.getInstance(HtmlPsiToHtmlDataConverter::class.java)
 
 
-    public fun convertAttribute(source: XmlAttribute): HtmlAttribute {
+     fun convertAttribute(source: XmlAttribute): HtmlAttribute {
         return HtmlAttribute(source.name, source.value);
     }
 
-    public fun convertPsiElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlTag? {
+    fun convertPsiFileToHtmlTag(psiFile: PsiFile): List<HtmlTag> {
+        val result = mutableListOf<HtmlTag>()
+        for (child in psiFile.children) {
+            when(child) {
+                is HtmlDocumentImpl -> {
+                    for (docChild in child.children) {
+                        val htmlTag = convertPsiElementToHtmlTag(docChild);
+                        if(htmlTag != null) {
+                            result.add(htmlTag)
+                        }
+                    }
+                }
+                else -> {
+                    val htmlTag = convertPsiElementToHtmlTag(child);
+                    if(htmlTag != null) {
+                        result.add(htmlTag)
+                    }
+                }
+            }
+
+        }
+
+        return result
+    }
+
+     fun convertPsiElementToHtmlTag(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlTag? {
 
         var htmlTag: HtmlTag? = null;
 
@@ -40,7 +67,7 @@ object HtmlPsiToHtmlDataConverter {
 
                 parentHtmlTag?.let {
                     for (childPsi in psiElement.children) {
-                        val childHtmlTag = convertPsiElement(childPsi, htmlTag);
+                        val childHtmlTag = convertPsiElementToHtmlTag(childPsi, htmlTag);
                         if (childHtmlTag != null) {
                             it.children.add(childHtmlTag)
                         }
@@ -64,7 +91,7 @@ object HtmlPsiToHtmlDataConverter {
             }
         }
 
-        return parentHtmlTag
+        return htmlTag
 
     }
 
@@ -110,32 +137,18 @@ object HtmlPsiToHtmlDataConverter {
         return isStartsWithXmlElement
     }
 
-    fun looksLikeHtml(psiFile: PsiFile): Boolean {
+    fun isLooksLikeHtml(psiFile: PsiFile): Boolean {
 
         return isStartsWithXmlElement(psiFile)
     }
 
-    fun looksLikeHtml(text: String, project: Project): Boolean {
+    fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile {
 
         val psiFileFactory = PsiFileFactory.getInstance(project)
-        val htmlPsiFile = psiFileFactory.createFileFromText("someFile", HTMLLanguage.INSTANCE, text)
-
-
-        val isHtml: Boolean
-
-        if (htmlPsiFile != null) {
-            isHtml = looksLikeHtml(htmlPsiFile)
-        } else {
-            isHtml = false
-        }
-
-        return isHtml
+        return psiFileFactory.createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
     }
-
-
 }
 
-fun PsiElement.toHtmlTag(parentHtmlTag: HtmlTag? = null): HtmlTag? =
-        HtmlPsiToHtmlDataConverter.convertPsiElement(this, parentHtmlTag)
 
-fun PsiElement.toKotlinX(): String? = this.toHtmlTag()?.toKotlinX()
+fun HtmlFileImpl.toHtmlTags(): List<HtmlTag> =
+        HtmlPsiToHtmlDataConverter.convertPsiFileToHtmlTag(this)

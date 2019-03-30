@@ -1,12 +1,12 @@
 package com.data2viz.kotlinx.htmlplugin.ide.controller
 
 import com.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
+import com.data2viz.kotlinx.htmlplugin.conversion.model.toHtmlTags
 import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import com.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
-import com.intellij.lang.html.HTMLLanguage
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.CaretStateTransferableData
 import com.intellij.openapi.editor.Editor
@@ -118,8 +118,10 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         val htmlTextTransferableData = textBlockTransferableData
 
 
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        val sourcePsiFileFromText: PsiFile = psiFileFactory.createFileFromText(htmlTextTransferableData.fileName, HTMLLanguage.INSTANCE, htmlTextTransferableData.fileText)
+
+        val text = htmlTextTransferableData.fileText
+        val fileName = htmlTextTransferableData.fileName
+        val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, fileName, text)
         LOGGER.warn("processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText")
         if (sourcePsiFileFromText !is HtmlFileImpl) {
             return
@@ -129,8 +131,8 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         LOGGER.warn("processTransferableData isFromHtmlFile=$isFromHtmlFile")
 
         if (!isFromHtmlFile) {
-            val looksLikeHtml = HtmlPsiToHtmlDataConverter.looksLikeHtml(sourcePsiFileFromText)
-            LOGGER.warn("processTransferableData looksLikeHtml=$looksLikeHtml")
+            val looksLikeHtml = HtmlPsiToHtmlDataConverter.isLooksLikeHtml(sourcePsiFileFromText)
+            LOGGER.warn("processTransferableData isLooksLikeHtml=$looksLikeHtml")
             if (!looksLikeHtml) {
                 return
             }
@@ -142,7 +144,12 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         if (!dialogIsOk) {
             return
         }
-        val convertedToKotlinText = convertCopiedCodeToKotlin(htmlTextTransferableData, sourcePsiFileFromText)
+
+        val htmlTags = sourcePsiFileFromText.toHtmlTags()
+
+        val convertedToKotlinText = htmlTags.toKotlinX()
+
+//        val convertedToKotlinText = convertCopiedCodeToKotlin(htmlTextTransferableData, sourcePsiFileFromText)
 
         val notEmpty = convertedToKotlinText.isNotEmpty()
         LOGGER.warn("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText");
@@ -167,136 +174,137 @@ class ConvertTextHTMLCopyPasteProcessorKt {
 
 
     }
-
-    public fun convertCopiedCodeToKotlin(htmlTextTransferableData: HtmlTextTransferableData, sourceFile: HtmlFileImpl): String {
-
-        val sb = StringBuilder()
-
-        val startOffsets = htmlTextTransferableData.startOffsets
-        val endOffsets = htmlTextTransferableData.endOffsets
-
-        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.size = ${startOffsets.size} endOffsets.size = ${endOffsets.size}")
-        if (startOffsets.size != endOffsets.size) {
-            throw AssertionError("startOffsets & endOffsets should be same size")
-        }
-
-
-        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.first()= ${startOffsets.first()} startOffsets.last() = ${startOffsets.last()}")
-        if (startOffsets.first() < startOffsets.last()) {
-            throw  AssertionError("start offset first should be lower than last")
-        }
-
-        for (i in startOffsets.indices) {
-            val startOffset = startOffsets[i]
-            val endOffset = endOffsets[i]
-            val textRange = TextRange(startOffset, endOffset)
-            val convertRangeToKotlin = convertRangeToKotlin(sourceFile, textRange)
-            sb.append(convertRangeToKotlin)
-        }
-
-        val sbResult = sb.toString()
-        val result = StringUtil.convertLineSeparators(sbResult)
-        LOGGER.warn("convertCopiedCodeToKotlin result=$result")
-        return result
-    }
-
-
-    private fun convertRangeToKotlin(file: HtmlFileImpl, range: TextRange): String {
-        val result = StringBuilder()
-        var currentRange = range
-        val string = file.text
-
-        LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
-
-        while (!currentRange.isEmpty) {
-            LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
-            val leafElement = findFirstLeafElementWhollyInRange(file, currentRange)
-
-            LOGGER.warn("convertRangeToKotlin leafElement=${leafElement}")
-            if (leafElement == null) {
-
-                val unconvertedSuffix = string.substring(currentRange.startOffset, currentRange.endOffset)
-
-                result.append(unconvertedSuffix)
-                break
-            }
-            val elementToConvert = findTopMostParentWhollyInRange(currentRange, leafElement)
-            val unconvertedPrefix = string.substring(currentRange.startOffset, elementToConvert!!.textRange.startOffset)
-            result.append(unconvertedPrefix)
-            val converted = elementToConvert.toKotlinX()
-            if (converted.isNullOrEmpty()) {
-                result.append(converted)
-            } else {
-                result.append(elementToConvert.text)
-            }
-            val endOfConverted = elementToConvert.textRange.endOffset
-            currentRange = TextRange(endOfConverted, currentRange.endOffset)
-        }
-
-        return result.toString()
-    }
-
-
-    private fun findFirstLeafElementWhollyInRange(file: HtmlFileImpl, range: TextRange): PsiElement? {
-
-        var result: PsiElement? = null
-
-
-        val startOffset = range.startOffset
-        val endOffset = range.endOffset
-
-        LOGGER.warn("findFirstLeafElementWhollyInRange startOffset=${startOffset} endOffset=${endOffset}")
-        var currentOffset = range.startOffset
-        while (startOffset < endOffset) {
-            LOGGER.warn("findFirstLeafElementWhollyInRange currentOffset=${currentOffset}")
-
-            val element = file.findElementAt(currentOffset)
-            if (element == null) {
-                currentOffset++
-                continue
-            }
-
-            val elemRange = element.textRange
-            if (!range.contains(elemRange)) {
-                currentOffset = elemRange.endOffset
-                continue
-            }
-
-            result = element
-            break
-        }
-        return result
-    }
-
-    private fun findTopMostParentWhollyInRange(range: TextRange, base: PsiElement): PsiElement? {
-
-
-        if (!range.contains(base.textRange)) {
-
-            throw AssertionError("Base element out of range. Range: " + range + ", element: " + base.text + ", element's range: " + base.textRange + ".")
-        }
-
-
-        var current = base
-        var result: PsiElement? = current
-
-
-        while (current.parent != null) {
-            if (current is PsiJavaFile) {
-                val fileTextRange = current.getTextRange()
-                val contains = range.contains(fileTextRange)
-                if (contains) {
-                    result = current
-                    break
-                }
-            }
-            current = current.parent
-        }
-
-        LOGGER.warn("findTopMostParentWhollyInRange result=$result")
-
-        return result
-    }
+//
+//
+//    public fun convertCopiedCodeToKotlin(htmlTextTransferableData: HtmlTextTransferableData, sourceFile: HtmlFileImpl): String {
+//
+//        val sb = StringBuilder()
+//
+//        val startOffsets = htmlTextTransferableData.startOffsets
+//        val endOffsets = htmlTextTransferableData.endOffsets
+//
+//        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.size = ${startOffsets.size} endOffsets.size = ${endOffsets.size}")
+//        if (startOffsets.size != endOffsets.size) {
+//            throw AssertionError("startOffsets & endOffsets should be same size")
+//        }
+//
+//
+//        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.first()= ${startOffsets.first()} startOffsets.last() = ${startOffsets.last()}")
+//        if (startOffsets.first() < startOffsets.last()) {
+//            throw  AssertionError("start offset first should be lower than last")
+//        }
+//
+//        for (i in startOffsets.indices) {
+//            val startOffset = startOffsets[i]
+//            val endOffset = endOffsets[i]
+//            val textRange = TextRange(startOffset, endOffset)
+//            val convertRangeToKotlin = convertRangeToKotlin(sourceFile, textRange)
+//            sb.append(convertRangeToKotlin)
+//        }
+//
+//        val sbResult = sb.toString()
+//        val result = StringUtil.convertLineSeparators(sbResult)
+//        LOGGER.warn("convertCopiedCodeToKotlin result=$result")
+//        return result
+//    }
+//
+//
+//    private fun convertRangeToKotlin(file: HtmlFileImpl, range: TextRange): String {
+//        val result = StringBuilder()
+//        var currentRange = range
+//        val string = file.text
+//
+//        LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
+//
+//        while (!currentRange.isEmpty) {
+//            LOGGER.warn("convertRangeToKotlin currentRange.isEmpty=${currentRange.isEmpty}")
+//            val leafElement = findFirstLeafElementWhollyInRange(file, currentRange)
+//
+//            LOGGER.warn("convertRangeToKotlin leafElement=${leafElement}")
+//            if (leafElement == null) {
+//
+//                val unconvertedSuffix = string.substring(currentRange.startOffset, currentRange.endOffset)
+//
+//                result.append(unconvertedSuffix)
+//                break
+//            }
+//            val elementToConvert = findTopMostParentWhollyInRange(currentRange, leafElement)
+//            val unconvertedPrefix = string.substring(currentRange.startOffset, elementToConvert!!.textRange.startOffset)
+//            result.append(unconvertedPrefix)
+//            val converted = elementToConvert.toKotlinX()
+//            if (converted.isNullOrEmpty()) {
+//                result.append(converted)
+//            } else {
+//                result.append(elementToConvert.text)
+//            }
+//            val endOfConverted = elementToConvert.textRange.endOffset
+//            currentRange = TextRange(endOfConverted, currentRange.endOffset)
+//        }
+//
+//        return result.toString()
+//    }
+//
+//
+//    private fun findFirstLeafElementWhollyInRange(file: HtmlFileImpl, range: TextRange): PsiElement? {
+//
+//        var result: PsiElement? = null
+//
+//
+//        val startOffset = range.startOffset
+//        val endOffset = range.endOffset
+//
+//        LOGGER.warn("findFirstLeafElementWhollyInRange startOffset=${startOffset} endOffset=${endOffset}")
+//        var currentOffset = range.startOffset
+//        while (startOffset < endOffset) {
+//            LOGGER.warn("findFirstLeafElementWhollyInRange currentOffset=${currentOffset}")
+//
+//            val element = file.findElementAt(currentOffset)
+//            if (element == null) {
+//                currentOffset++
+//                continue
+//            }
+//
+//            val elemRange = element.textRange
+//            if (!range.contains(elemRange)) {
+//                currentOffset = elemRange.endOffset
+//                continue
+//            }
+//
+//            result = element
+//            break
+//        }
+//        return result
+//    }
+//
+//    private fun findTopMostParentWhollyInRange(range: TextRange, base: PsiElement): PsiElement? {
+//
+//
+//        if (!range.contains(base.textRange)) {
+//
+//            throw AssertionError("Base element out of range. Range: " + range + ", element: " + base.text + ", element's range: " + base.textRange + ".")
+//        }
+//
+//
+//        var current = base
+//        var result: PsiElement? = current
+//
+//
+//        while (current.parent != null) {
+//            if (current is PsiJavaFile) {
+//                val fileTextRange = current.getTextRange()
+//                val contains = range.contains(fileTextRange)
+//                if (contains) {
+//                    result = current
+//                    break
+//                }
+//            }
+//            current = current.parent
+//        }
+//
+//        LOGGER.warn("findTopMostParentWhollyInRange result=$result")
+//
+//        return result
+//    }
 
 
 }

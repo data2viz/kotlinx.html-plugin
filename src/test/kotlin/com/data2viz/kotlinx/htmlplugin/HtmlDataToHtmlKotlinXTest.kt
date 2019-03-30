@@ -1,13 +1,14 @@
-package com.data2viz.kotlinx.htmlplugin.conversion.model
+package com.data2viz.kotlinx.htmlplugin
 
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
+import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import org.junit.Assert
 import org.junit.Test
 
 import org.junit.Assert.*
 
-class HtmlDataToHtmlKotlinXKtTest {
+class HtmlDataToHtmlKotlinXTest {
 
     @Test
     fun HtmlTagtoKotlinXBase() {
