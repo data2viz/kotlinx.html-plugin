@@ -92,36 +92,30 @@ object HtmlPsiToHtmlDataConverter {
 
         LOGGER.warn("isStartsWithXmlElement type $psiElement")
 
-        val isStartsWithXmlElement: Boolean
+        var isStartsWithXmlElement: Boolean
         when (psiElement) {
 
-            is XmlTag, is XmlDoctype, is HtmlFileImpl
-            ->
-                isStartsWithXmlElement = true
-
-            else -> {
-                val destination = mutableListOf<PsiElement>()
-
+            is HtmlDocumentImpl, is HtmlFileImpl -> {
                 val children = psiElement.children
-                for (child in children) {
+                if (children.isNotEmpty()) {
 
-                    if (child is PsiWhiteSpace) {
-                        continue
-                    }
-
-                    if (child.textLength < 0) {
-                        continue
-                    }
-
-                    destination.add(child)
-                }
-
-                if (destination.isEmpty()) {
                     isStartsWithXmlElement = false
+                    for (child in children) {
+                        isStartsWithXmlElement = isStartsWithXmlElement(child)
+                        if (isStartsWithXmlElement) {
+                            break;
+                        }
+                    }
+
+
                 } else {
-                    isStartsWithXmlElement = isStartsWithXmlElement(destination[0])
+                    isStartsWithXmlElement = false
                 }
             }
+
+            is XmlTag, is XmlDoctype -> isStartsWithXmlElement = true
+
+            else -> isStartsWithXmlElement = false
         }
 
         LOGGER.warn("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
