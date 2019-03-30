@@ -6,6 +6,7 @@ import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import com.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
+import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.CaretStateTransferableData
@@ -24,7 +25,7 @@ import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 
 
-class ConvertTextHTMLCopyPasteProcessorKt {
+open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlockTransferableData>() {
 
 
     companion object {
@@ -32,7 +33,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         private val LOGGER = Logger.getInstance(ConvertTextHTMLCopyPasteProcessorKt::class.java)
     }
 
-    fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): MutableList<TextBlockTransferableData> {
+    override fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): MutableList<TextBlockTransferableData> {
 
 
         val resultList = mutableListOf<TextBlockTransferableData>()
@@ -49,7 +50,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
 
     }
 
-    fun extractTransferableData(content: Transferable): MutableList<TextBlockTransferableData>? {
+    override fun extractTransferableData(content: Transferable): List<TextBlockTransferableData> {
 
 
         val result = mutableListOf<TextBlockTransferableData>()
@@ -84,7 +85,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         return result
     }
 
-    fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, textValues: MutableList<TextBlockTransferableData>) {
+    override fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, textValues: MutableList<TextBlockTransferableData>) {
 
         val isDump = DumbService.getInstance(project).isDumb
         LOGGER.warn("processTransferableData isDump=$isDump");

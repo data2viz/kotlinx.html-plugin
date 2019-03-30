@@ -1,21 +1,9 @@
 package com.data2viz.kotlinx.htmlplugin.ide.controller;
 
-import com.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinXActionKx;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
 
-public class ConvertHTMLToKotlinXAction extends AnAction {
+// Hack, because Kotlin files not works as reference in plugin.xml
+public class ConvertHTMLToKotlinXAction extends ConvertHTMLToKotlinXActionKx {
 
-    private static final ConvertHTMLToKotlinXActionKx actionKx = new ConvertHTMLToKotlinXActionKx();
 
-    public ConvertHTMLToKotlinXAction() {
-        super(ConvertHTMLToKotlinXActionKx.Companion.getName());
-    }
-
-    @Override
-    public void actionPerformed(AnActionEvent e) {
-
-        actionKx.actionPerformed(e);
-    }
 
 }

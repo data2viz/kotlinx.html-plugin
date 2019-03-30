@@ -1,13 +1,14 @@
 package com.data2viz.kotlinx.htmlplugin.ide.controller
 
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.ui.Messages
 
-class ConvertHTMLToKotlinXActionKx {
+open class ConvertHTMLToKotlinXActionKx: AnAction("Convert HTML To KotlinX") {
 
 
-    fun actionPerformed(e: AnActionEvent) {
+    override fun actionPerformed(e: AnActionEvent) {
 
         LOGGER.warn("actionPerformed")
         Messages.showMessageDialog(e.project, "Hello world!", "Greeting", Messages.getInformationIcon())
@@ -16,7 +17,7 @@ class ConvertHTMLToKotlinXActionKx {
     companion object {
 
         private val LOGGER = Logger.getInstance(ConvertHTMLToKotlinXActionKx::class.java)
-        val name = "Convert HTML To KotlinX";
+
     }
 
 }
