@@ -138,12 +138,6 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
         }
 
 
-        val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
-        LOGGER.warn("processTransferableData dialogIsOk=$dialogIsOk");
-        if (!dialogIsOk) {
-            return
-        }
-
         val htmlElements = sourcePsiFileFromText.converToHtmlElements()
 
         val convertedToKotlinText = htmlElements.toKotlinX()
@@ -152,6 +146,14 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
         val notEmpty = convertedToKotlinText.isNotEmpty()
         LOGGER.warn("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText");
         if (notEmpty) {
+
+
+            val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
+            LOGGER.warn("processTransferableData dialogIsOk=$dialogIsOk");
+            if (!dialogIsOk) {
+                return
+            }
+
 
             ApplicationManager.getApplication().runWriteAction {
 
