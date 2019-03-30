@@ -33,7 +33,7 @@ fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
 fun HtmlTag.isInline(): Boolean {
     val isInline: Boolean
 
-    if (children.size > 1) {
+    if (children.size == 1) {
         isInline = children[0] is HtmlText
     } else {
         isInline = false
@@ -47,29 +47,37 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
 
     sb.addTabIndent(currentIndent)
-    sb.append("$name (")
+    sb.append("$name")
 
 
-    val lastIndex = attributes.size - 1
-    for ((index, attribute) in attributes.withIndex()) {
-        sb.append(attribute.toKotlinX())
-        if (index != lastIndex) {
-            sb.append(", ")
+    val attributesSize = attributes.size
+
+    if (attributesSize > 0) {
+        sb.append("(")
+        val lastIndex = attributesSize - 1
+        for ((index, attribute) in attributes.withIndex()) {
+            sb.append(attribute.toKotlinX())
+            if (index != lastIndex) {
+                sb.append(", ")
+            }
         }
+        sb.append(")")
     }
 
-    sb.append(") {")
+    sb.append(" {")
     if (!inline) {
         sb.append("\n")
     }
 
     for (child in children) {
-        if (inline) {
+        if (!inline) {
             sb.append(child.toKotlinX(currentIndent + 1))
             sb.append("\n")
         } else {
 
-            sb.append(child.toKotlinX())
+            // add space before + inline
+            sb.append(" ")
+            sb.append(child.toKotlinX(0))
         }
     }
 
@@ -89,7 +97,10 @@ fun HtmlText.toKotlinX(currentIndent: Int = 0): String {
 
     sb.addTabIndent(currentIndent)
     sb.append("+ \"$text\"")
-    sb.append("\n")
+    // add newline only if it is not inline body
+    if(currentIndent > 0) {
+        sb.append("\n")
+    }
 
     return sb.toString()
 }

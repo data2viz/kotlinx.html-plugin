@@ -20,8 +20,30 @@ class HtmlTextToKotlinXTextTest: ResourcesTest() {
     }
 
     @Test
+    fun FileHtmlToKotlinXAttrsImg() {
+        assertFiles("attrs_img.html", "attrs_img.htmlkotlinx")
+    }
+
+
+    @Test
+    fun FileHtmlToKotlinXAttrsA() {
+        assertFiles("attrs_a.html", "attrs_a.htmlkotlinx")
+    }
+
+
+    @Test
+    fun FileHtmlToKotlinXAttrsInline() {
+        assertFiles("inline.html", "inline.htmlkotlinx")
+    }
+
+    @Test
     fun FileHtmlToKotlinXNested() {
         assertFiles("nested.html", "nested.htmlkotlinx")
+    }
+
+    @Test
+    fun FileHtmlToKotlinXNestedSeveralTextChilds() {
+        assertFiles("nested_several_text_childs.html", "nested_several_text_childs.htmlkotlinx")
     }
 
     private fun assertFiles(filenameHtml: String, filenameKotlinX: String) {

@@ -1,0 +1,6 @@
+div {
+    + "Text "
+    b { +"bold" }
+    + " and "
+    i { +"italic" }
+}

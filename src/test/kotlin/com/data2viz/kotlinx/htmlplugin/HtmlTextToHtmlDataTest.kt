@@ -46,7 +46,7 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
 
         Assert.assertEquals(1, htmlTags.size)
 
-        htmlTags[0].apply {
+        (htmlTags[0] as HtmlTag).apply {
             Assert.assertEquals("div", name)
             Assert.assertEquals(2, attributes.size)
             attributes[0].apply {
@@ -70,16 +70,16 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
         Assert.assertEquals(1, htmlTags.size)
 
 
-        htmlTags[0].apply {
+        (htmlTags[0] as HtmlTag).apply {
             Assert.assertEquals("div", name)
             Assert.assertEquals(1, children.size)
-            children[0].apply {
+            (children[0] as HtmlTag).apply {
                 Assert.assertEquals("div", name)
             }
 
         }
 
-        htmlTags[0].apply {
+        (htmlTags[0] as HtmlTag).apply {
             Assert.assertEquals("div", name)
         }
 
