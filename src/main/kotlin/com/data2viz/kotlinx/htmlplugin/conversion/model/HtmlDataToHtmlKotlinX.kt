@@ -31,14 +31,18 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
 
     sb.addTabIndent(currentIndent)
-    sb.append("$name {\n")
+    sb.append("$name (")
 
 
-    for (attribute in attributes) {
-        sb.addTabIndent(currentIndent + 1)
+    val lastIndex = attributes.size - 1
+    for ((index, attribute) in attributes.withIndex()) {
         sb.append(attribute.toKotlinX())
-        sb.append("\n")
+        if (index != lastIndex) {
+            sb.append(", ")
+        }
     }
+
+    sb.append(") {\n")
 
     for (child in children) {
         sb.append(child.toKotlinX(currentIndent + 1))
@@ -69,7 +73,7 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
     val last = last();
     for (htmlTag in this) {
 
-        sb.append("${htmlTag.toKotlinX()}")
+        sb.append("${htmlTag.toKotlinX(currentIndent)}")
 
         if (htmlTag != last) {
             sb.append("\n}")
@@ -80,14 +84,14 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
 }
 
 
-fun HtmlAttribute.toKotlinX(currentIndent: Int = 0): String {
+fun HtmlAttribute.toKotlinX(): String {
 
     val result: String
     if (value != null) {
         result = "$name = \"$value\""
     } else {
-        result = name
-
+        // empty attrs it is boolean attrs
+        result = "$name = true"
     }
 
     return result
