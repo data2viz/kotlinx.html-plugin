@@ -4,18 +4,41 @@ import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
 import com.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
 import com.data2viz.kotlinx.htmlplugin.conversion.model.INDENT
+import com.data2viz.kotlinx.htmlplugin.conversion.model.isCustomForTag
 import com.data2viz.kotlinx.htmlplugin.conversion.model.isInline
 import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import org.junit.Assert
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class HtmlDataToHtmlKotlinXTest {
 
     @Test
     fun HtmlTagtoKotlinXBase() {
         Assert.assertEquals("div {\n}", HtmlTag("div").toKotlinX())
+    }
+
+    @Test
+    fun HtmlAttributeIsCustom() {
+
+        var htmlTag = HtmlTag("link")
+
+        var htmlAttribute = HtmlAttribute("data-label")
+        Assert.assertEquals(true, htmlAttribute.isCustomForTag(htmlTag))
+        htmlAttribute = HtmlAttribute("data")
+        Assert.assertEquals(false, htmlAttribute.isCustomForTag(htmlTag))
+
+        htmlAttribute = HtmlAttribute("link")
+        Assert.assertEquals(false, htmlAttribute.isCustomForTag(htmlTag))
+
+        htmlAttribute = HtmlAttribute("integrity", "integrity")
+        Assert.assertEquals(true, htmlAttribute.isCustomForTag(htmlTag))
+
+        htmlAttribute = HtmlAttribute("crossorigin", "crossorigin")
+        Assert.assertEquals(true, htmlAttribute.isCustomForTag(htmlTag))
+
+        htmlAttribute = HtmlAttribute("link", "src")
+        Assert.assertEquals(false, htmlAttribute.isCustomForTag(htmlTag))
+
     }
 
     @Test

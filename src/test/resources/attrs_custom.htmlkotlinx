@@ -1,3 +1,4 @@
-div(attr2 = "value2") {
+link(attr2 = "value2") {
+    attributes["integrity"] = "value"
     attributes["aria-label"] = "value"
 }

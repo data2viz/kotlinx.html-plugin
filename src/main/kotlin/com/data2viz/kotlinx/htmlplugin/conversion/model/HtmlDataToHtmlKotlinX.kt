@@ -43,17 +43,16 @@ fun HtmlTag.isInline(): Boolean {
 }
 
 // Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
-fun HtmlAttribute.isCustom(): Boolean {
+fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
     var custom = attrName.contains("-")
 
-    when (attrName) {
-        "link" -> {
-            custom = custom or (value == "integrity")
-            custom = custom or (value == "crossorigin")
+    if (!custom) {
+        when (tag.tagName) {
+            "link" -> {
+                custom = (attrName == "integrity") or (attrName == "crossorigin")
+            }
         }
     }
-
-
 
     return custom
 }
@@ -65,16 +64,14 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     sb.addTabIndent(currentIndent)
     sb.append("$tagName")
 
-    val defaultAttributes = attributes.filter { !it.isCustom() }
+    val defaultAttributes = attributes.filter { !it.isCustomForTag(this) }
 
     if (defaultAttributes.isNotEmpty()) {
         sb.append("(")
         val lastIndex = defaultAttributes.size - 1
         for ((index, attribute) in defaultAttributes.withIndex()) {
 
-            if (attribute.isCustom()) {
-                continue
-            }
+
             sb.append(attribute.toKotlinX())
             if (index != lastIndex) {
                 sb.append(", ")
@@ -89,14 +86,12 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     }
 
 
-    val customAttributes = attributes.filter { it.isCustom() }
+    val customAttributes = attributes.filter { it.isCustomForTag(this) }
     if (customAttributes.isNotEmpty()) {
 
         for (attribute in customAttributes) {
 
-            if (!attribute.isCustom()) {
-                continue
-            }
+
             sb.addTabIndent(currentIndent + 1)
             sb.append(attribute.toKotlinXCustomAttribute())
 
@@ -130,24 +125,30 @@ fun HtmlText.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder();
 
     sb.addTabIndent(currentIndent)
-    sb.append("+ \"$text\"")
+    val convertText = convertText(text)
+    sb.append("+ \"$convertText\"")
 
     return sb.toString()
 }
+
+fun convertText(text: String): String = text.replace("\"", "\\\"")
 
 
 fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
-    val last = last();
-    for (htmlTag in this) {
+    if (size > 0) {
+        val last = last();
+        for (htmlTag in this) {
 
-        sb.append("${htmlTag.toKotlinX(currentIndent)}")
+            sb.append("${htmlTag.toKotlinX(currentIndent)}")
 
-        if (htmlTag != last) {
-            sb.append("\n}")
+            if (htmlTag != last) {
+                sb.append("\n}")
+            }
         }
     }
+
 
     return sb.toString()
 }
