@@ -115,11 +115,18 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
 fun HtmlAttribute.toKotlinX(): String {
 
     val result: String
+
+    // remap for kotlinx
+    val attrName = when (name) {
+        "class" -> "classes"
+        else -> name
+    }
+
     if (value != null) {
-        result = "$name = \"$value\""
+        result = "$attrName = \"$value\""
     } else {
         // empty attrs it is boolean attrs
-        result = "$name = true"
+        result = "$attrName = true"
     }
 
     return result
