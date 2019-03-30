@@ -15,6 +15,18 @@ import javax.swing.JLabel
 import javax.swing.JPanel
 
 class KotlinPasteFromHtmlDialog(project: Project) : DialogWrapper(project, true) {
+
+
+    companion object {
+
+        fun isOK(project: Project): Boolean {
+            val dialog = KotlinPasteFromHtmlDialog(project)
+            dialog.show()
+
+            return dialog.isOK
+        }
+    }
+
     private var myPanel: javax.swing.JPanel? = null
     private val buttonOK: javax.swing.JButton? = null
 
@@ -58,14 +70,5 @@ class KotlinPasteFromHtmlDialog(project: Project) : DialogWrapper(project, true)
         jPanel.add(spacer as Component, GridConstraints(1, 0, 1, 1, 0, 2, 1, 6, null, null, null))
     }
 
-    companion object {
-
-        fun isOK(project: Project): Boolean {
-            val dialog = KotlinPasteFromHtmlDialog(project)
-            dialog.show()
-
-            return dialog.isOK
-        }
-    }
 }
 

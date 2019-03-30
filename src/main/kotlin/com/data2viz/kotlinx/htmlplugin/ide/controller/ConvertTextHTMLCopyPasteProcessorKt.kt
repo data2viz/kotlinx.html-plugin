@@ -1,6 +1,8 @@
 package com.data2viz.kotlinx.htmlplugin.ide.controller
 
 import com.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
+import com.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
+import com.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
 import com.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
@@ -20,7 +22,6 @@ import com.intellij.psi.impl.source.html.HtmlFileImpl
 
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
-import java.util.ArrayList
 
 
 class ConvertTextHTMLCopyPasteProcessorKt {
@@ -34,7 +35,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
     fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): MutableList<TextBlockTransferableData> {
 
 
-        val resultList = ArrayList<TextBlockTransferableData>()
+        val resultList = mutableListOf<TextBlockTransferableData>()
 
         val isHtmlFile = file is HtmlFileImpl
 
@@ -72,10 +73,8 @@ class ConvertTextHTMLCopyPasteProcessorKt {
                 val transferableData = content.getTransferData(DataFlavor.stringFlavor)
 
                 val str = transferableData as String
-                val startOffsets = intArrayOf(0)
-                val endOffsets = intArrayOf(str.length)
-                val fromHtmlFile = false
-                val external = HtmlTextTransferableData("external", str, startOffsets, endOffsets, fromHtmlFile)
+
+                val external = ExternalFileHtmlTextTransferableData(str)
                 result.add(external)
 
             }
@@ -148,9 +147,8 @@ class ConvertTextHTMLCopyPasteProcessorKt {
         val notEmpty = convertedToKotlinText.isNotEmpty()
         LOGGER.warn("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText");
         if (notEmpty) {
-            val application = ApplicationManager.getApplication()
 
-            application.runWriteAction {
+            ApplicationManager.getApplication().runWriteAction {
 
                 LOGGER.warn("processTransferableData runWriteAction")
                 val startOffset = bounds.startOffset
@@ -164,6 +162,42 @@ class ConvertTextHTMLCopyPasteProcessorKt {
             }
 
         }
+
+        
+
+
+    }
+
+    public fun convertCopiedCodeToKotlin(htmlTextTransferableData: HtmlTextTransferableData, sourceFile: HtmlFileImpl): String {
+
+        val sb = StringBuilder()
+
+        val startOffsets = htmlTextTransferableData.startOffsets
+        val endOffsets = htmlTextTransferableData.endOffsets
+
+        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.size = ${startOffsets.size} endOffsets.size = ${endOffsets.size}")
+        if (startOffsets.size != endOffsets.size) {
+            throw AssertionError("startOffsets & endOffsets should be same size")
+        }
+
+
+        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.first()= ${startOffsets.first()} startOffsets.last() = ${startOffsets.last()}")
+        if (startOffsets.first() < startOffsets.last()) {
+            throw  AssertionError("start offset first should be lower than last")
+        }
+
+        for (i in startOffsets.indices) {
+            val startOffset = startOffsets[i]
+            val endOffset = endOffsets[i]
+            val textRange = TextRange(startOffset, endOffset)
+            val convertRangeToKotlin = convertRangeToKotlin(sourceFile, textRange)
+            sb.append(convertRangeToKotlin)
+        }
+
+        val sbResult = sb.toString()
+        val result = StringUtil.convertLineSeparators(sbResult)
+        LOGGER.warn("convertCopiedCodeToKotlin result=$result")
+        return result
     }
 
 
@@ -189,7 +223,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
             val elementToConvert = findTopMostParentWhollyInRange(currentRange, leafElement)
             val unconvertedPrefix = string.substring(currentRange.startOffset, elementToConvert!!.textRange.startOffset)
             result.append(unconvertedPrefix)
-            val converted = HtmlPsiToHtmlDataConverter.convertElement(elementToConvert)
+            val converted = elementToConvert.toKotlinX()
             if (converted.isNullOrEmpty()) {
                 result.append(converted)
             } else {
@@ -239,7 +273,7 @@ class ConvertTextHTMLCopyPasteProcessorKt {
 
         if (!range.contains(base.textRange)) {
 
-            AssertionError("Base element out of range. Range: " + range + ", element: " + base.text + ", element's range: " + base.textRange + ".")
+            throw AssertionError("Base element out of range. Range: " + range + ", element: " + base.text + ", element's range: " + base.textRange + ".")
         }
 
 
@@ -261,38 +295,6 @@ class ConvertTextHTMLCopyPasteProcessorKt {
 
         LOGGER.warn("findTopMostParentWhollyInRange result=$result")
 
-        return result
-    }
-
-
-    private fun convertCopiedCodeToKotlin(code: HtmlTextTransferableData, fileCopiedFrom: HtmlFileImpl): String {
-
-        val sb = StringBuilder()
-
-        val startOffsets = code.startOffsets
-        val endOffsets = code.endOffsets
-
-        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.size = ${startOffsets.size} endOffsets.size = ${endOffsets.size}")
-        if (startOffsets.size != endOffsets.size) {
-            throw  Exception("should be same size")
-        }
-
-
-        LOGGER.warn("convertCopiedCodeToKotlin startOffsets.first()= ${startOffsets.first()} startOffsets.last() = ${startOffsets.last()}")
-        if (startOffsets.first() < startOffsets.last()) {
-            throw  Exception("start offset first should be lower than last")
-        }
-
-        for (i in startOffsets.indices) {
-            val startOffset = startOffsets[i]
-            val endOffset = endOffsets[i]
-            val convertRangeToKotlin = convertRangeToKotlin(fileCopiedFrom, TextRange(startOffset, endOffset))
-            sb.append(convertRangeToKotlin)
-        }
-
-        val sbResult = sb.toString()
-        val result = StringUtil.convertLineSeparators(sbResult)
-        LOGGER.warn("convertCopiedCodeToKotlin result=$result")
         return result
     }
 

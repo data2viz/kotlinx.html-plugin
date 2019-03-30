@@ -8,7 +8,7 @@ import com.intellij.openapi.diagnostic.Logger
 import java.awt.datatransfer.DataFlavor
 
 
-class HtmlTextTransferableData(val fileName: String, val fileText: String, val startOffsets: IntArray, val endOffsets: IntArray, val isFromHtmlFile: Boolean) : TextBlockTransferableData {
+open class HtmlTextTransferableData(val fileName: String, val fileText: String, val startOffsets: IntArray, val endOffsets: IntArray, val isFromHtmlFile: Boolean) : TextBlockTransferableData {
 
     override fun getFlavor(): DataFlavor {
         return dataFlavor;
@@ -30,4 +30,11 @@ class HtmlTextTransferableData(val fileName: String, val fileText: String, val s
         var dataFlavor: DataFlavor = DataFlavor(ConvertTextHTMLCopyPasteProcessor::class.java, "class: com.data2viz.kotlinx.htmlplugin.ide.controller.ConvertTextHTMLCopyPasteProcessor")
 
     }
+}
+
+class ExternalFileHtmlTextTransferableData(
+        fileText: String)
+    : HtmlTextTransferableData(
+        "external", fileText, intArrayOf(0), intArrayOf(fileText.length), false) {
+
 }
