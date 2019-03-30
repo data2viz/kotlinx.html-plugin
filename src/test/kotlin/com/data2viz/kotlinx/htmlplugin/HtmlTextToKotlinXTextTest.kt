@@ -14,6 +14,11 @@ class HtmlTextToKotlinXTextTest: ResourcesTest() {
         assertFiles("base.html", "base.htmlkotlinx")
     }
 
+    @Test
+    fun FileHtmlToKotlinXNested() {
+        assertFiles("nested.html", "nested.htmlkotlinx")
+    }
+
     private fun assertFiles(filenameHtml: String, filenameKotlinX: String) {
 
         val kotlinXText = loadFileText(filenameKotlinX)

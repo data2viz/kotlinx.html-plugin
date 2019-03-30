@@ -83,11 +83,11 @@ object HtmlPsiToHtmlDataConverter {
                 parentHtmlTag?.body = psiElement.text.trim();
             }
 
-            else -> {
-                // if (source.language != HTMLLanguage.INSTANCE && source.language != XMLLanguage.INSTANCE) {
-                //any not handled text
-                parentHtmlTag?.body = psiElement.text
-            }
+//            else -> {
+//                // if (source.language != HTMLLanguage.INSTANCE && source.language != XMLLanguage.INSTANCE) {
+//                //any not handled text
+//                parentHtmlTag?.body = psiElement.text
+//            }
         }
 
         return htmlTag
