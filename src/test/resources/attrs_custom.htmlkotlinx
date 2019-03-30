@@ -1,0 +1,3 @@
+div(attr2 = "value2") {
+    attributes["aria-label"] = "value"
+}

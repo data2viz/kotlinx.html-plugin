@@ -20,6 +20,11 @@ class HtmlTextToKotlinXTextTest: ResourcesTest() {
     }
 
     @Test
+    fun FileHtmlToKotlinXAttrsCustom() {
+        assertFiles("attrs_custom.html", "attrs_custom.htmlkotlinx")
+    }
+
+    @Test
     fun FileHtmlToKotlinXAttrsImg() {
         assertFiles("attrs_img.html", "attrs_img.htmlkotlinx")
     }

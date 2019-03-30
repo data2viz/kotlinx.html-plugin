@@ -69,12 +69,23 @@ class HtmlDataToHtmlKotlinXTest {
         htmlTag.attributes.add(HtmlAttribute("attr1"))
         htmlTag.attributes.add(HtmlAttribute("attr2", "value2"))
 
-        Assert.assertEquals("div(attr1 = true, attr2 = \"value2\") {\n}", htmlTag.toKotlinX())
+        Assert.assertEquals("div(attr1 = \"true\", attr2 = \"value2\") {\n}", htmlTag.toKotlinX())
+    }
+
+
+    @Test
+    fun HtmlTagtoKotlinXCustomAttributes() {
+        val htmlTag = HtmlTag("div")
+
+        htmlTag.attributes.add(HtmlAttribute("aria-label1"))
+        htmlTag.attributes.add(HtmlAttribute("aria-label2", "value2"))
+
+        Assert.assertEquals("div {\n${INDENT}attributes[\"aria-label1\"] = \"true\"\n${INDENT}attributes[\"aria-label2\"] = \"value2\"\n}", htmlTag.toKotlinX())
     }
 
     @Test
     fun HtmlAttributetoKotlinXWithoutValue() {
-        Assert.assertEquals("attr_name = true", HtmlAttribute("attr_name").toKotlinX())
+        Assert.assertEquals("attr_name = \"true\"", HtmlAttribute("attr_name").toKotlinX())
     }
 
     @Test

@@ -1,2 +1,2 @@
-div(attr1 = true, attr2 = "value2") {
+div(attr1 = "true", attr2 = "value2") {
 }

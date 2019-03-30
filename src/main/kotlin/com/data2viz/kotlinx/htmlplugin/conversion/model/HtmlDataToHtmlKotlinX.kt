@@ -42,6 +42,22 @@ fun HtmlTag.isInline(): Boolean {
     return isInline
 }
 
+// Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
+fun HtmlAttribute.isCustom(): Boolean {
+    var custom = attrName.contains("-")
+
+    when (attrName) {
+        "link" -> {
+            custom = custom or (value == "integrity")
+            custom = custom or (value == "crossorigin")
+        }
+    }
+
+
+
+    return custom
+}
+
 fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val inline = isInline();
     val sb = StringBuilder();
@@ -49,13 +65,16 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     sb.addTabIndent(currentIndent)
     sb.append("$tagName")
 
+    val defaultAttributes = attributes.filter { !it.isCustom() }
 
-    val attributesSize = attributes.size
-
-    if (attributesSize > 0) {
+    if (defaultAttributes.isNotEmpty()) {
         sb.append("(")
-        val lastIndex = attributesSize - 1
-        for ((index, attribute) in attributes.withIndex()) {
+        val lastIndex = defaultAttributes.size - 1
+        for ((index, attribute) in defaultAttributes.withIndex()) {
+
+            if (attribute.isCustom()) {
+                continue
+            }
             sb.append(attribute.toKotlinX())
             if (index != lastIndex) {
                 sb.append(", ")
@@ -67,6 +86,22 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     sb.append(" {")
     if (!inline) {
         sb.append("\n")
+    }
+
+
+    val customAttributes = attributes.filter { it.isCustom() }
+    if (customAttributes.isNotEmpty()) {
+
+        for (attribute in customAttributes) {
+
+            if (!attribute.isCustom()) {
+                continue
+            }
+            sb.addTabIndent(currentIndent + 1)
+            sb.append(attribute.toKotlinXCustomAttribute())
+
+            sb.append("\n")
+        }
     }
 
     for (child in children) {
@@ -132,8 +167,25 @@ fun HtmlAttribute.toKotlinX(): String {
         result = "$attrName = \"$value\""
     } else {
         // empty attrs it is boolean attrs
-        result = "$attrName = true"
+        result = "$attrName = \"true\""
     }
+
+    return result
+}
+
+
+fun HtmlAttribute.toKotlinXCustomAttribute(): String {
+
+    val result: String
+
+
+    if (value != null) {
+        result = "attributes[\"$attrName\"] = \"$value\""
+    } else {
+        // empty attrs it is boolean attrs
+        result = "attributes[\"$attrName\"] = \"true\""
+    }
+
 
     return result
 }
