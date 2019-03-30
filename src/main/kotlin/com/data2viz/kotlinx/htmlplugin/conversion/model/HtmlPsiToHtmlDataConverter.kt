@@ -90,7 +90,7 @@ object HtmlPsiToHtmlDataConverter {
 
     fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
-        LOGGER.warn("isStartsWithXmlElement type $psiElement")
+        LOGGER.debug("isStartsWithXmlElement type $psiElement")
 
         var isStartsWithXmlElement: Boolean
         when (psiElement) {
@@ -118,7 +118,7 @@ object HtmlPsiToHtmlDataConverter {
             else -> isStartsWithXmlElement = false
         }
 
-        LOGGER.warn("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
+        LOGGER.debug("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
 
         return isStartsWithXmlElement
     }

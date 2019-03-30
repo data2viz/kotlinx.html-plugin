@@ -17,7 +17,7 @@ open class ConvertHTMLToKotlinXActionKx : AnAction("Convert HTML To KotlinX") {
 
     override fun actionPerformed(e: AnActionEvent) {
 
-        LOGGER.warn("actionPerformed")
+        LOGGER.debug("actionPerformed")
 
         val editor = e.getRequiredData(CommonDataKeys.EDITOR);
         val project = e.project
