@@ -28,10 +28,10 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
 
 
     @Test
-     fun fileHtmlToHtmlDataBase() {
+    fun fileHtmlToHtmlDataBase() {
         val htmlTags = loadHtmlData("base.html")
 
-        Assert.assertEquals(1,htmlTags.size)
+        Assert.assertEquals(1, htmlTags.size)
 
 
         htmlTags[0].apply {
@@ -40,6 +40,27 @@ class HtmlTextToHtmlDataTest : ResourcesTest() {
 
     }
 
+    @Test
+    fun fileHtmlToHtmlDataNested() {
+        val htmlTags = loadHtmlData("nested.html")
+
+        Assert.assertEquals(1, htmlTags.size)
+
+
+        htmlTags[0].apply {
+            Assert.assertEquals("div", name)
+            Assert.assertEquals(1, children.size)
+            children[0].apply {
+                Assert.assertEquals("div", name)
+            }
+
+        }
+
+        htmlTags[0].apply {
+            Assert.assertEquals("div", name)
+        }
+
+    }
 
 
 }

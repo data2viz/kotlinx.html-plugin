@@ -21,25 +21,25 @@ object HtmlPsiToHtmlDataConverter {
     private val LOGGER = Logger.getInstance(HtmlPsiToHtmlDataConverter::class.java)
 
 
-     fun convertAttribute(source: XmlAttribute): HtmlAttribute {
+    fun convertAttribute(source: XmlAttribute): HtmlAttribute {
         return HtmlAttribute(source.name, source.value);
     }
 
     fun convertPsiFileToHtmlTag(psiFile: PsiFile): List<HtmlTag> {
         val result = mutableListOf<HtmlTag>()
         for (child in psiFile.children) {
-            when(child) {
+            when (child) {
                 is HtmlDocumentImpl -> {
                     for (docChild in child.children) {
                         val htmlTag = convertPsiElementToHtmlTag(docChild);
-                        if(htmlTag != null) {
+                        if (htmlTag != null) {
                             result.add(htmlTag)
                         }
                     }
                 }
                 else -> {
                     val htmlTag = convertPsiElementToHtmlTag(child);
-                    if(htmlTag != null) {
+                    if (htmlTag != null) {
                         result.add(htmlTag)
                     }
                 }
@@ -50,7 +50,7 @@ object HtmlPsiToHtmlDataConverter {
         return result
     }
 
-     fun convertPsiElementToHtmlTag(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlTag? {
+    fun convertPsiElementToHtmlTag(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlTag? {
 
         var htmlTag: HtmlTag? = null;
 
@@ -65,14 +65,13 @@ object HtmlPsiToHtmlDataConverter {
 
                 }
 
-                parentHtmlTag?.let {
-                    for (childPsi in psiElement.children) {
-                        val childHtmlTag = convertPsiElementToHtmlTag(childPsi, htmlTag);
-                        if (childHtmlTag != null) {
-                            it.children.add(childHtmlTag)
-                        }
+                for (childPsi in psiElement.children) {
+                    val childHtmlTag = convertPsiElementToHtmlTag(childPsi, htmlTag);
+                    if (childHtmlTag != null) {
+                        htmlTag.children.add(childHtmlTag)
                     }
                 }
+
             }
 
             is XmlAttribute -> {
