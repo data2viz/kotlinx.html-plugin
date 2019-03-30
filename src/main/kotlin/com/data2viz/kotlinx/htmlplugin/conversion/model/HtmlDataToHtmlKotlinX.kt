@@ -27,7 +27,23 @@ fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
 }
 
 
+/**
+ * Tags with only one text is inline
+ */
+fun HtmlTag.isInline(): Boolean {
+    val isInline: Boolean
+
+    if (children.size > 1) {
+        isInline = children[0] is HtmlText
+    } else {
+        isInline = false
+    }
+
+    return isInline
+}
+
 fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
+    val inline = isInline();
     val sb = StringBuilder();
 
     sb.addTabIndent(currentIndent)
@@ -42,13 +58,25 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
         }
     }
 
-    sb.append(") {\n")
-
-    for (child in children) {
-        sb.append(child.toKotlinX(currentIndent + 1))
+    sb.append(") {")
+    if (!inline) {
         sb.append("\n")
     }
-    sb.addTabIndent(currentIndent)
+
+    for (child in children) {
+        if (inline) {
+            sb.append(child.toKotlinX(currentIndent + 1))
+            sb.append("\n")
+        } else {
+
+            sb.append(child.toKotlinX())
+        }
+    }
+
+    if (!inline) {
+        sb.addTabIndent(currentIndent)
+    }
+
     sb.append("}")
 
     return sb.toString()
