@@ -52,7 +52,7 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
     sb.addTabIndent(currentIndent)
-    sb.append("$tagName")
+    sb.append(tagName)
 
     val defaultAttributes = attributes.filter { !it.isCustomForTag(this) }
 
@@ -131,7 +131,7 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
         val last = last()
         for (htmlTag in this) {
 
-            sb.append("${htmlTag.toKotlinX(currentIndent)}")
+            sb.append(htmlTag.toKotlinX(currentIndent))
 
             if (htmlTag != last) {
                 sb.append("\n")
@@ -139,14 +139,11 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
         }
     }
 
-
     return sb.toString()
 }
 
 
 fun HtmlAttribute.toKotlinX(): String {
-
-    val result: String
 
     // remap for kotlinx
     val attrName = when (attrName) {
@@ -154,19 +151,15 @@ fun HtmlAttribute.toKotlinX(): String {
         else -> attrName
     }
 
-    if (value != null) {
-        result = "$attrName = \"$value\""
-    } else {
-        // empty attrs it is boolean attrs
-        result = "$attrName = \"true\""
+    return when {
+        value != null   -> """$attrName = "$value" """.trim()
+        else            -> """$attrName = "true" """.trim()
     }
-
-    return result
 }
 
 
 fun HtmlAttribute.toKotlinXCustomAttribute(): String =
         when {
-            value != null -> """attributes["$attrName"] = "$value""""
-            else -> """attributes["$attrName"] = "true""""
+            value != null   -> """attributes["$attrName"] = "$value" """.trim()
+            else            -> """attributes["$attrName"] = "true" """.trim()
         }
