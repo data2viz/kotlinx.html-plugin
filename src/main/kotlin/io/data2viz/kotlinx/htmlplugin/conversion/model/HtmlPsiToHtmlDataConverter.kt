@@ -22,10 +22,7 @@ object HtmlPsiToHtmlDataConverter {
 
     private val LOGGER = Logger.getInstance(HtmlPsiToHtmlDataConverter::class.java)
 
-
-    fun convertAttribute(source: XmlAttribute): HtmlAttribute {
-        return HtmlAttribute(source.name, source.value)
-    }
+    fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
 
     fun convertPsiFileToHtmlTag(psiFile: PsiFile): List<HtmlElement> {
         val result = mutableListOf<HtmlElement>()
@@ -71,7 +68,6 @@ object HtmlPsiToHtmlDataConverter {
             }
 
             is XmlAttribute -> {
-
                 parentHtmlTag?.attributes?.add(convertAttribute(psiElement))
             }
 
@@ -124,23 +120,17 @@ object HtmlPsiToHtmlDataConverter {
         return isStartsWithXmlElement
     }
 
-    fun isLooksLikeHtml(psiFile: PsiFile): Boolean {
+    fun isLooksLikeHtml(psiFile: PsiFile): Boolean = isStartsWithXmlElement(psiFile)
 
-        return isStartsWithXmlElement(psiFile)
-    }
+    fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile =
+            PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
 
-    fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile {
-
-
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        return psiFileFactory.createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
-    }
-
-    fun createHtmlFileFromText(project: Project, text: String): PsiFile {
-
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        return psiFileFactory.createFileFromText(HTMLLanguage.INSTANCE, text)
-    }
+    fun createHtmlFileFromText(project: Project, text: String): PsiFile =
+            PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(HTMLLanguage.INSTANCE, text)
 }
 
 
