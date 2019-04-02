@@ -168,6 +168,6 @@ fun HtmlAttribute.toKotlinX(): String {
 
 fun HtmlAttribute.toKotlinXCustomAttribute(): String =
         when {
-            value != null   -> """attributes["$attrName"] = "$value" """
-            else            -> """attributes["$attrName"] = "true" """
+            value != null -> """attributes["$attrName"] = "$value" """
+            else -> """attributes["$attrName"] = "true" """
         }
