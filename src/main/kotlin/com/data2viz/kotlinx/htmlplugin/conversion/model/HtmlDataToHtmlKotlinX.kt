@@ -10,9 +10,10 @@ import java.lang.StringBuilder
 val INDENT = "    " // 4 spaces
 
 fun StringBuilder.addTabIndent(currentIndent: Int) {
-    for (i in 1..currentIndent) {
+    repeat(currentIndent) {
         append(INDENT)
     }
+
 }
 
 fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
