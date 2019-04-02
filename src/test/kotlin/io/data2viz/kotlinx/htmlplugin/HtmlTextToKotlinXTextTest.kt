@@ -1,16 +1,15 @@
 package io.data2viz.kotlinx.htmlplugin
 
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
+
 import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
-import com.intellij.testFramework.LightPlatform4TestCase
 import org.junit.Assert
 import org.junit.Test
 
-class HtmlTextToKotlinXTextTest: ResourcesTest() {
+class HtmlTextToKotlinXTextTest : ResourcesTest() {
 
 
     @Test
-     fun FileHtmlToKotlinXBase() {
+    fun FileHtmlToKotlinXBase() {
         assertFiles("base.html", "base.htmlkotlinx")
     }
 
@@ -62,7 +61,6 @@ class HtmlTextToKotlinXTextTest: ResourcesTest() {
         Assert.assertEquals(kotlinXText, convertedToKotlinXText);
 
     }
-
 
 
 }

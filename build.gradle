@@ -16,8 +16,6 @@ repositories {
     jcenter()
 }
 
-
-
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
 
@@ -29,8 +27,9 @@ dependencies {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version '2016.2'
+    version '2016.1'
 }
+
 patchPluginXml {
     changeNotes """
       First version"""
