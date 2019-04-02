@@ -29,19 +29,9 @@ fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
 
 
 /**
- * Tags with only one text is inline
+ * Tags with only one text child is inline
  */
-fun HtmlTag.isInline(): Boolean {
-    val isInline: Boolean
-
-    if (children.size == 1) {
-        isInline = children[0] is HtmlText
-    } else {
-        isInline = false
-    }
-
-    return isInline
-}
+fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText
 
 // Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
 fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
