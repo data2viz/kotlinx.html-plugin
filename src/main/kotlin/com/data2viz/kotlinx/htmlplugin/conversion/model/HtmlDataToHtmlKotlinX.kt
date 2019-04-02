@@ -166,19 +166,8 @@ fun HtmlAttribute.toKotlinX(): String {
 }
 
 
-fun HtmlAttribute.toKotlinXCustomAttribute(): String {
-
-    val result: String
-
-
-    if (value != null) {
-        result = "attributes[\"$attrName\"] = \"$value\""
-    } else {
-        // empty attrs it is boolean attrs
-        result = "attributes[\"$attrName\"] = \"true\""
-    }
-
-
-    return result
-}
-
+fun HtmlAttribute.toKotlinXCustomAttribute(): String =
+        when {
+            value != null   -> """attributes["$attrName"] = "$value" """
+            else            -> """attributes["$attrName"] = "true" """
+        }
