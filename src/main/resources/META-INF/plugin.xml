@@ -3,34 +3,28 @@
     <name>HTML to kotlinx.html</name>
     <vendor url="http://data2viz.io">data2viz.io</vendor>
 
-    <idea-version since-build="161"/>
     <description><![CDATA[
     An Intellij plugin to copy/paste from HTML to kotlinx.html.
 
 This plugin simplifies the transformation of HTML code to a kotlinx.html project by automatically doing the conversion during a copy/paste.
     ]]></description>
 
-
     <depends>com.intellij.modules.lang</depends>
 
-
     <extensions defaultExtensionNs="com.intellij">
-
-                <copyPastePostProcessor
-                        implementation="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertTextHTMLCopyPasteProcessor"/>
+        <copyPastePostProcessor
+                implementation="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertTextHTMLCopyPasteProcessor"/>
     </extensions>
 
 
     <actions>
-<!--        <group id="MyPlugin.SampleMenu" text="Greeting" description="Greeting menu">-->
-<!--                <add-to-group group-id="MainMenu" anchor="last"/>-->
-            <!--            <action id="Myplugin.Textboxes" class="com.data2viz.kotlinx.htmlplugin.HelloAction" text="Hello" description="Says hello"/>-->
-            <action id="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinXAction"
-                    class="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinXAction" text="Convert HTML To KotlinX"
-                    description="Convert selected HTML code to KotlinX code">
-                <keyboard-shortcut keymap="$default" first-keystroke="shift meta alt X"/>
-                <add-to-group group-id="ToolsMenu" anchor="last"/>
-            </action>
-<!--        </group>-->
+        <action id="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinxAction"
+                class="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinxAction"
+                text="Convert HTML To KotlinX"
+                description="Convert selected HTML code to KotlinX code">
+            <keyboard-shortcut keymap="$default" first-keystroke="shift meta alt X"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+        <!--        </group>-->
     </actions>
 </idea-plugin>
