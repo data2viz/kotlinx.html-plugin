@@ -5,5 +5,4 @@ package io.data2viz.kotlinx.htmlplugin.ide.controller;
 public class ConvertHTMLToKotlinXAction extends ConvertHTMLToKotlinXActionKx {
 
 
-
 }

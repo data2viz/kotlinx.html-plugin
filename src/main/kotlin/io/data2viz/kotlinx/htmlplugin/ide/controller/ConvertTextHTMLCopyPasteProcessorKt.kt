@@ -1,29 +1,29 @@
 package io.data2viz.kotlinx.htmlplugin.ide.controller
 
+import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
+import com.intellij.codeInsight.editorActions.TextBlockTransferableData
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.CaretStateTransferableData
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.RangeMarker
+import com.intellij.openapi.project.DumbService
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.util.Ref
+import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiFile
+import com.intellij.psi.impl.source.html.HtmlFileImpl
 import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
 import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
 import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
 import io.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
 import io.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
 import io.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
-import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
-import com.intellij.codeInsight.editorActions.TextBlockTransferableData
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.CaretStateTransferableData
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.RangeMarker
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.util.Ref
-import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.project.DumbService
-import com.intellij.psi.*
-import com.intellij.psi.impl.source.html.HtmlFileImpl
-
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 
 
-open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlockTransferableData>() {
+open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBlockTransferableData>() {
 
 
     companion object {
@@ -38,7 +38,7 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
 
         val isHtmlFile = file is HtmlFileImpl
 
-        LOGGER.debug("collectTransferableData isHtmlFile=$isHtmlFile");
+        LOGGER.debug("collectTransferableData isHtmlFile=$isHtmlFile")
         if (isHtmlFile) {
             val htmlTextSelection = HtmlTextTransferableData(file.name, file.text, startOffsets, endOffsets, true)
             resultList.add(htmlTextSelection)
@@ -66,8 +66,8 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
             val isNotCopyPasteFromIdeaFile = !content.isDataFlavorSupported(CaretStateTransferableData.FLAVOR)
             val isSomeStringContent = content.isDataFlavorSupported(DataFlavor.stringFlavor)
 
-            LOGGER.debug("extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile");
-            LOGGER.debug("extractTransferableData isSomeStringContent=$isSomeStringContent");
+            LOGGER.debug("extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile")
+            LOGGER.debug("extractTransferableData isSomeStringContent=$isSomeStringContent")
             if (isNotCopyPasteFromIdeaFile && isSomeStringContent) {
                 val transferableData = content.getTransferData(DataFlavor.stringFlavor)
 
@@ -79,14 +79,14 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
             }
         }
 
-        LOGGER.debug("extractTransferableData result.size=${result.size}");
+        LOGGER.debug("extractTransferableData result.size=${result.size}")
         return result
     }
 
     override fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, textValues: MutableList<TextBlockTransferableData>) {
 
         val isDump = DumbService.getInstance(project).isDumb
-        LOGGER.debug("processTransferableData isDump=$isDump");
+        LOGGER.debug("processTransferableData isDump=$isDump")
         if (isDump) {
             return
         }
@@ -94,7 +94,7 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
 
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         val targetPsiFile = psiDocumentManager.getPsiFile(editor.document)
-        LOGGER.debug("processTransferableData targetPsiFile=$targetPsiFile");
+        LOGGER.debug("processTransferableData targetPsiFile=$targetPsiFile")
 
         if (targetPsiFile == null) {
             return
@@ -103,19 +103,18 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
 
         val textValuesSize = textValues.size
 
-        LOGGER.debug("processTransferableData textValuesSize=$textValuesSize");
+        LOGGER.debug("processTransferableData textValuesSize=$textValuesSize")
         if (textValuesSize != 1) {
             return
         }
         val textBlockTransferableData = textValues[0]
 
-        LOGGER.debug("processTransferableData textBlockTransferableData=$textBlockTransferableData");
+        LOGGER.debug("processTransferableData textBlockTransferableData=$textBlockTransferableData")
 
         if (textBlockTransferableData !is HtmlTextTransferableData) {
             return
         }
         val htmlTextTransferableData = textBlockTransferableData
-
 
 
         val text = htmlTextTransferableData.fileText
@@ -144,12 +143,12 @@ open class ConvertTextHTMLCopyPasteProcessorKt: CopyPastePostProcessor<TextBlock
 
 
         val notEmpty = convertedToKotlinText.isNotEmpty()
-        LOGGER.debug("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText");
+        LOGGER.debug("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText")
         if (notEmpty) {
 
 
             val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
-            LOGGER.debug("processTransferableData dialogIsOk=$dialogIsOk");
+            LOGGER.debug("processTransferableData dialogIsOk=$dialogIsOk")
             if (!dialogIsOk) {
                 return
             }

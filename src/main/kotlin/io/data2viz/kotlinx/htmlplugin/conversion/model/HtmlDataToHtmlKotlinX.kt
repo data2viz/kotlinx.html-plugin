@@ -1,10 +1,9 @@
 package io.data2viz.kotlinx.htmlplugin.conversion.model
 
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
+import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
-import java.lang.StringBuilder
 
 
 val INDENT = "    " // 4 spaces
@@ -49,8 +48,8 @@ fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
 }
 
 fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
-    val inline = isInline();
-    val sb = StringBuilder();
+    val inline = isInline()
+    val sb = StringBuilder()
 
     sb.addTabIndent(currentIndent)
     sb.append("$tagName")
@@ -113,7 +112,7 @@ fun HtmlTag.toKotlinX(currentIndent: Int = 0): String {
 
 
 fun HtmlText.toKotlinX(currentIndent: Int = 0): String {
-    val sb = StringBuilder();
+    val sb = StringBuilder()
 
     sb.addTabIndent(currentIndent)
     val convertText = convertText(text)
@@ -129,7 +128,7 @@ fun Collection<HtmlElement>.toKotlinX(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
     if (size > 0) {
-        val last = last();
+        val last = last()
         for (htmlTag in this) {
 
             sb.append("${htmlTag.toKotlinX(currentIndent)}")
