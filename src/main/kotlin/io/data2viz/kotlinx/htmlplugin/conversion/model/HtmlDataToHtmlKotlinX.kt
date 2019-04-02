@@ -22,7 +22,7 @@ fun HtmlElement.toKotlinX(currentIndent: Int = 0): String {
         is HtmlTag -> toKotlinX(currentIndent)
         is HtmlText -> toKotlinX(currentIndent)
         else -> {
-            throw AssertionError("${this.javaClass.typeName} not supported")
+            error("${this.javaClass.typeName} not supported")
         }
     }
 }
