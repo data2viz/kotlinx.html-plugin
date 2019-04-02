@@ -5,7 +5,7 @@ import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
 import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
 import java.io.File
 
-open class ResourcesTest : LightPlatform4TestCase() {
+abstract class ResourcesTest : LightPlatform4TestCase() {
 
 
     protected fun loadHtmlData(filenameHtml: String): List<HtmlElement> {
@@ -15,7 +15,7 @@ open class ResourcesTest : LightPlatform4TestCase() {
 
         val psiHtmlFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(ourProject, filenameHtml, htmlText)
 
-        val htmlTag = HtmlPsiToHtmlDataConverter.convertPsiFileToHtmlTag(psiHtmlFile);
+        val htmlTag = HtmlPsiToHtmlDataConverter.convertPsiFileToHtmlTag(psiHtmlFile)
 
         return htmlTag
 
@@ -24,6 +24,6 @@ open class ResourcesTest : LightPlatform4TestCase() {
     protected fun loadFileText(filename: String): String {
         val classLoader = javaClass.classLoader
         val file = File(classLoader.getResource(filename)!!.file)
-        return file.readText();
+        return file.readText()
     }
 }
