@@ -6,7 +6,7 @@ import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
 import io.data2viz.kotlinx.htmlplugin.conversion.model.INDENT
 import io.data2viz.kotlinx.htmlplugin.conversion.model.isCustomForTag
 import io.data2viz.kotlinx.htmlplugin.conversion.model.isInline
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
+import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
 import org.junit.Assert
 import org.junit.Test
 
@@ -14,13 +14,13 @@ class HtmlDataToHtmlKotlinXTest {
 
     @Test
     fun HtmlTagtoKotlinXBase() {
-        Assert.assertEquals("div {\n}", HtmlTag("div").toKotlinX())
+        Assert.assertEquals("div {\n}", HtmlTag("div").toKotlinx())
     }
 
     @Test
     fun HtmlAttributeIsCustom() {
 
-        var htmlTag = HtmlTag("link")
+        val htmlTag = HtmlTag("link")
 
         var htmlAttribute = HtmlAttribute("data-label")
         Assert.assertEquals(true, htmlAttribute.isCustomForTag(htmlTag))
@@ -63,7 +63,7 @@ class HtmlDataToHtmlKotlinXTest {
     fun HtmlTagtoKotlinXInline() {
         val htmlTag = HtmlTag("div")
         htmlTag.children.add(HtmlText("text"))
-        Assert.assertEquals("div { + \"text\"}", htmlTag.toKotlinX())
+        Assert.assertEquals("div { + \"text\"}", htmlTag.toKotlinx())
     }
 
 
@@ -72,7 +72,7 @@ class HtmlDataToHtmlKotlinXTest {
         val htmlTag = HtmlTag("div")
         htmlTag.children.add(HtmlTag("p"))
         htmlTag.children.add(HtmlTag("span"))
-        Assert.assertEquals("div {\n${INDENT}p {\n$INDENT}\n${INDENT}span {\n$INDENT}\n}", htmlTag.toKotlinX())
+        Assert.assertEquals("div {\n${INDENT}p {\n$INDENT}\n${INDENT}span {\n$INDENT}\n}", htmlTag.toKotlinx())
     }
 
 
@@ -82,7 +82,7 @@ class HtmlDataToHtmlKotlinXTest {
         val inner = HtmlTag("p")
         htmlTag.children.add(inner)
         inner.children.add(HtmlTag("span"))
-        Assert.assertEquals("div {\n${INDENT}p {\n$INDENT${INDENT}span {\n$INDENT$INDENT}\n$INDENT}\n}", htmlTag.toKotlinX())
+        Assert.assertEquals("div {\n${INDENT}p {\n$INDENT${INDENT}span {\n$INDENT$INDENT}\n$INDENT}\n}", htmlTag.toKotlinx())
     }
 
 
@@ -92,7 +92,7 @@ class HtmlDataToHtmlKotlinXTest {
         htmlTag.attributes.add(HtmlAttribute("attr1"))
         htmlTag.attributes.add(HtmlAttribute("attr2", "value2"))
 
-        Assert.assertEquals("div(attr1 = \"true\", attr2 = \"value2\") {\n}", htmlTag.toKotlinX())
+        Assert.assertEquals("div(attr1 = \"true\", attr2 = \"value2\") {\n}", htmlTag.toKotlinx())
     }
 
 
@@ -103,16 +103,16 @@ class HtmlDataToHtmlKotlinXTest {
         htmlTag.attributes.add(HtmlAttribute("aria-label1"))
         htmlTag.attributes.add(HtmlAttribute("aria-label2", "value2"))
 
-        Assert.assertEquals("div {\n${INDENT}attributes[\"aria-label1\"] = \"true\"\n${INDENT}attributes[\"aria-label2\"] = \"value2\"\n}", htmlTag.toKotlinX())
+        Assert.assertEquals("div {\n${INDENT}attributes[\"aria-label1\"] = \"true\"\n${INDENT}attributes[\"aria-label2\"] = \"value2\"\n}", htmlTag.toKotlinx())
     }
 
     @Test
     fun HtmlAttributetoKotlinXWithoutValue() {
-        Assert.assertEquals("attr_name = \"true\"", HtmlAttribute("attr_name").toKotlinX())
+        Assert.assertEquals("attr_name = \"true\"", HtmlAttribute("attr_name").toKotlinx())
     }
 
     @Test
     fun HtmlAttributetoKotlinXWithValue() {
-        Assert.assertEquals("attr_name = \"attr_value\"", HtmlAttribute("attr_name", "attr_value").toKotlinX())
+        Assert.assertEquals("attr_name = \"attr_value\"", HtmlAttribute("attr_name", "attr_value").toKotlinx())
     }
 }
