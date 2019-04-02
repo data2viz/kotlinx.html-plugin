@@ -131,6 +131,7 @@ object HtmlPsiToHtmlDataConverter {
 
     fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile {
 
+
         val psiFileFactory = PsiFileFactory.getInstance(project)
         return psiFileFactory.createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
     }

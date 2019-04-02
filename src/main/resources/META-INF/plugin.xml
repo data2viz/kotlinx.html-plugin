@@ -3,7 +3,7 @@
     <name>HTML to kotlinx.html</name>
     <vendor url="http://data2viz.io">data2viz.io</vendor>
 
-    <idea-version since-build="162"/>
+    <idea-version since-build="161"/>
     <description><![CDATA[
     An Intellij plugin to copy/paste from HTML to kotlinx.html.
 
