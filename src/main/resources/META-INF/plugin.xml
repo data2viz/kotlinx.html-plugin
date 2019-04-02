@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>com.data2viz.kotlinx.htmlplugin</id>
+    <id>io.data2viz.kotlinx.htmlplugin</id>
     <name>HTML to kotlinx.html</name>
     <vendor url="http://data2viz.io">data2viz.io</vendor>
 
