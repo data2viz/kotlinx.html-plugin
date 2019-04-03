@@ -7,8 +7,8 @@ fun StringBuilder.addTabIndent(currentIndent: Int) = repeat(currentIndent) { app
 
 fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
     when (this) {
-        is HtmlTag -> toKotlinx(currentIndent)
-        is HtmlText -> toKotlinx(currentIndent)
+        is HtmlTag  -> toKotlinx(currentIndent)
+        is HtmlText -> toKotlinxText(currentIndent)
         else        -> error("${this.javaClass.typeName} not supported")
     }
 
@@ -87,13 +87,13 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 }
 
 
-fun HtmlText.toKotlinx(currentIndent: Int = 0): String =
+fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
     StringBuilder().apply {
         addTabIndent(currentIndent)
-        append("""+ "${convertText(text)}"""")
+        append("""+ "${escapeChars(text)}"""")
     }.toString()
 
-fun convertText(text: String): String = text.replace("\"", "\\\"")
+fun escapeChars(text: String): String = text.replace("\"", "\\\"")
 
 
 fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =

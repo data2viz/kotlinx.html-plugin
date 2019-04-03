@@ -4,6 +4,7 @@ import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.diagnostic.debug
 import com.intellij.openapi.editor.CaretStateTransferableData
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.RangeMarker
@@ -21,7 +22,8 @@ import java.awt.datatransfer.Transferable
 
 val logger = Logger.getInstance(ConvertTextHTMLCopyPasteProcessor::class.java)
 
-inline fun Logger.debug(lazyMessage: () -> String) {
+
+inline fun Logger.debug (lazyMessage: () -> String ) {
     if (isDebugEnabled) {
         debug(lazyMessage())
     }
@@ -42,7 +44,7 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
         val dataFlavor = htmlDataFlavor
         val isCopyFromHtmlFile = content.isDataFlavorSupported(dataFlavor)
 
-        logger.debug("extractTransferableData isCopyFromHtmlFile=$isCopyFromHtmlFile")
+        logger.debug {"extractTransferableData isCopyFromHtmlFile=$isCopyFromHtmlFile" }
         if (isCopyFromHtmlFile) {
             val transferableData = content.getTransferData(dataFlavor) as TextBlockTransferableData
             result.add(transferableData)
@@ -52,8 +54,8 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
             val isNotCopyPasteFromIdeaFile = !content.isDataFlavorSupported(CaretStateTransferableData.FLAVOR)
             val isSomeStringContent = content.isDataFlavorSupported(DataFlavor.stringFlavor)
 
-            logger.debug("extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile")
-            logger.debug("extractTransferableData isSomeStringContent=$isSomeStringContent")
+            logger.debug { "extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile" }
+            logger.debug { "extractTransferableData isSomeStringContent=$isSomeStringContent"}
             if (isNotCopyPasteFromIdeaFile && isSomeStringContent) {
                 val transferableData = content.getTransferData(DataFlavor.stringFlavor)
 
@@ -64,7 +66,7 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
             }
         }
 
-        logger.debug("extractTransferableData result.size=${result.size}")
+        logger.debug {"extractTransferableData result.size=${result.size}"}
         return result
     }
 
@@ -75,7 +77,7 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
                                          textValues: MutableList<TextBlockTransferableData>) {
 
         val isDump = DumbService.getInstance(project).isDumb
-        logger.debug("processTransferableData isDump=$isDump")
+        logger.debug { "processTransferableData isDump=$isDump" }
         if (isDump) {
             return
         }
@@ -83,7 +85,7 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
 
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         val targetPsiFile = psiDocumentManager.getPsiFile(editor.document)
-        logger.debug("processTransferableData targetPsiFile=$targetPsiFile")
+        logger.debug { "processTransferableData targetPsiFile=$targetPsiFile" }
 
         if (targetPsiFile == null) {
             return
@@ -92,13 +94,13 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
 
         val textValuesSize = textValues.size
 
-        logger.debug("processTransferableData textValuesSize=$textValuesSize")
+        logger.debug { "processTransferableData textValuesSize=$textValuesSize" }
         if (textValuesSize != 1) {
             return
         }
         val textBlockTransferableData = textValues[0]
 
-        logger.debug("processTransferableData textBlockTransferableData=$textBlockTransferableData")
+        logger.debug { "processTransferableData textBlockTransferableData=$textBlockTransferableData" }
 
         if (textBlockTransferableData !is HtmlTextTransferableData) {
             return
@@ -109,17 +111,17 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
         val text = htmlTextTransferableData.fileText
         val fileName = htmlTextTransferableData.fileName
         val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, fileName, text)
-        logger.debug("processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText")
+        logger.debug { "processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText" }
         if (sourcePsiFileFromText !is HtmlFileImpl) {
             return
         }
 
         val isFromHtmlFile = htmlTextTransferableData.isFromHtmlFile
-        logger.debug("processTransferableData isFromHtmlFile=$isFromHtmlFile")
+        logger.debug { "processTransferableData isFromHtmlFile=$isFromHtmlFile" }
 
         if (!isFromHtmlFile) {
             val looksLikeHtml = HtmlPsiToHtmlDataConverter.isLooksLikeHtml(sourcePsiFileFromText)
-            logger.debug("processTransferableData isLooksLikeHtml=$looksLikeHtml")
+            logger.debug { "processTransferableData isLooksLikeHtml=$looksLikeHtml" }
             if (!looksLikeHtml) {
                 return
             }
@@ -132,19 +134,19 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
 
 
         val notEmpty = convertedToKotlinText.isNotEmpty()
-        logger.debug("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText")
+        logger.debug { "processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText" }
         if (notEmpty) {
 
 
             val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
-            logger.debug("processTransferableData dialogIsOk=$dialogIsOk")
+            logger.debug { "processTransferableData dialogIsOk=$dialogIsOk" }
             if (!dialogIsOk) {
                 return
             }
 
             ApplicationManager.getApplication().runWriteAction {
 
-                logger.debug("processTransferableData runWriteAction")
+                logger.debug { "processTransferableData runWriteAction" }
                 val startOffset = bounds.startOffset
                 editor.document.replaceString(bounds.startOffset, bounds.endOffset, convertedToKotlinText)
                 val endOffsetAfterCopy = startOffset + convertedToKotlinText.length

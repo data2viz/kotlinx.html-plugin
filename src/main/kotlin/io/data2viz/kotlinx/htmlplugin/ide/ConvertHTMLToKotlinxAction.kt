@@ -14,7 +14,7 @@ import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 class ConvertHTMLToKotlinxAction : AnAction("Convert HTML To Kotlinx.html") {
 
     override fun actionPerformed(e: AnActionEvent) {
-        logger.debug("actionPerformed")
+        logger.debug { "actionPerformed" }
 
         val editor = e.getRequiredData(CommonDataKeys.EDITOR)
         val project = e.project ?: return

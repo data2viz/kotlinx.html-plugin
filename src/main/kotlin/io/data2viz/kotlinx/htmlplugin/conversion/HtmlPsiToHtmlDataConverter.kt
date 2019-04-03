@@ -11,6 +11,7 @@ import com.intellij.psi.xml.XmlAttribute
 import com.intellij.psi.xml.XmlDoctype
 import com.intellij.psi.xml.XmlTag
 import com.intellij.psi.xml.XmlText
+import io.data2viz.kotlinx.htmlplugin.ide.debug
 import io.data2viz.kotlinx.htmlplugin.ide.logger
 
 
@@ -81,7 +82,7 @@ object HtmlPsiToHtmlDataConverter {
 
     private fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
-        logger.debug("isStartsWithXmlElement type $psiElement")
+        logger.debug {"isStartsWithXmlElement type $psiElement"}
 
         var isStartsWithXmlElement: Boolean
         when (psiElement) {
@@ -109,7 +110,7 @@ object HtmlPsiToHtmlDataConverter {
             else -> isStartsWithXmlElement = false
         }
 
-        logger.debug("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
+        logger.debug { "isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}" }
 
         return isStartsWithXmlElement
     }
