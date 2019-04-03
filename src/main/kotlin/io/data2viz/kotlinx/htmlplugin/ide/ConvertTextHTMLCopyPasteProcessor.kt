@@ -114,9 +114,23 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
         val htmlTextTransferableData = textBlockTransferableData
 
 
-        val text = htmlTextTransferableData.fileText
+        val fileText = htmlTextTransferableData.fileText
         val fileName = htmlTextTransferableData.fileName
-        val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, fileName, text)
+
+        val selectedText = if (
+                htmlTextTransferableData.startOffsets.isNotEmpty() &&
+                htmlTextTransferableData.endOffsets.isNotEmpty()) {
+            fileText.subSequence(
+                    htmlTextTransferableData.startOffsets[0],
+                    htmlTextTransferableData.endOffsets[0])
+                    .toString()
+        } else {
+            fileText
+        }
+
+
+        val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, fileName, selectedText)
+
         logger.debug { "processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText" }
         if (sourcePsiFileFromText !is HtmlFileImpl) {
             return
