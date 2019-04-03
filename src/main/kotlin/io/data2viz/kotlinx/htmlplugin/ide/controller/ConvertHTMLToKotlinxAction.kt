@@ -4,19 +4,17 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
 import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
 import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
 import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
 
-private val LOGGER = Logger.getInstance(ConvertHTMLToKotlinxAction::class.java)
 
 class ConvertHTMLToKotlinxAction : AnAction("Convert HTML To Kotlinx.html") {
 
     override fun actionPerformed(e: AnActionEvent) {
-        LOGGER.debug("actionPerformed")
+        logger.debug("actionPerformed")
 
         val editor = e.getRequiredData(CommonDataKeys.EDITOR)
         val project = e.project ?: return

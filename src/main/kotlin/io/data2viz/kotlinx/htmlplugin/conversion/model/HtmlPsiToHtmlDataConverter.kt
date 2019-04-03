@@ -1,7 +1,6 @@
 package io.data2viz.kotlinx.htmlplugin.conversion.model
 
 import com.intellij.lang.html.HTMLLanguage
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -16,11 +15,10 @@ import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
 import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
+import io.data2viz.kotlinx.htmlplugin.ide.controller.logger
 
 
 object HtmlPsiToHtmlDataConverter {
-
-    private val LOGGER = Logger.getInstance(HtmlPsiToHtmlDataConverter::class.java)
 
     fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
 
@@ -87,7 +85,7 @@ object HtmlPsiToHtmlDataConverter {
 
     fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
-        LOGGER.debug("isStartsWithXmlElement type $psiElement")
+        logger.debug("isStartsWithXmlElement type $psiElement")
 
         var isStartsWithXmlElement: Boolean
         when (psiElement) {
@@ -115,7 +113,7 @@ object HtmlPsiToHtmlDataConverter {
             else -> isStartsWithXmlElement = false
         }
 
-        LOGGER.debug("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
+        logger.debug("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
 
         return isStartsWithXmlElement
     }
