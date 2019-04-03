@@ -91,6 +91,12 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
             return
         }
 
+        val name = targetPsiFile.name
+        if (!name.endsWith(".kt")) {
+            return
+        }
+
+
 
         val textValuesSize = textValues.size
 
