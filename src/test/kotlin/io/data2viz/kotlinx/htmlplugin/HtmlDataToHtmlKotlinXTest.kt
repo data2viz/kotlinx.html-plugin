@@ -1,12 +1,12 @@
 package io.data2viz.kotlinx.htmlplugin
 
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
-import io.data2viz.kotlinx.htmlplugin.conversion.model.INDENT
-import io.data2viz.kotlinx.htmlplugin.conversion.model.isCustomForTag
-import io.data2viz.kotlinx.htmlplugin.conversion.model.isInline
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlAttribute
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlTag
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlText
+import io.data2viz.kotlinx.htmlplugin.conversion.INDENT
+import io.data2viz.kotlinx.htmlplugin.conversion.isCustomForTag
+import io.data2viz.kotlinx.htmlplugin.conversion.isInline
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 import org.junit.Assert
 import org.junit.Test
 

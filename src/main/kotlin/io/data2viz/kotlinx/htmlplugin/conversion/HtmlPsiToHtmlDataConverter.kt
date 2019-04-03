@@ -1,4 +1,4 @@
-package io.data2viz.kotlinx.htmlplugin.conversion.model
+package io.data2viz.kotlinx.htmlplugin.conversion
 
 import com.intellij.lang.html.HTMLLanguage
 import com.intellij.openapi.project.Project
@@ -11,16 +11,10 @@ import com.intellij.psi.xml.XmlAttribute
 import com.intellij.psi.xml.XmlDoctype
 import com.intellij.psi.xml.XmlTag
 import com.intellij.psi.xml.XmlText
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
-import io.data2viz.kotlinx.htmlplugin.ide.controller.logger
+import io.data2viz.kotlinx.htmlplugin.ide.logger
 
 
 object HtmlPsiToHtmlDataConverter {
-
-    fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
 
     fun convertPsiFileToHtmlTag(psiFile: PsiFile): List<HtmlElement> {
         val result = mutableListOf<HtmlElement>()
@@ -47,7 +41,9 @@ object HtmlPsiToHtmlDataConverter {
         return result
     }
 
-    fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? {
+    private fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
+
+    private fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? {
 
         var htmlElement: HtmlElement? = null
 
@@ -83,7 +79,7 @@ object HtmlPsiToHtmlDataConverter {
     }
 
 
-    fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
+    private fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
         logger.debug("isStartsWithXmlElement type $psiElement")
 

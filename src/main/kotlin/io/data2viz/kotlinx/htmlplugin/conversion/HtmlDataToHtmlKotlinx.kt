@@ -1,9 +1,4 @@
-package io.data2viz.kotlinx.htmlplugin.conversion.model
-
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
+package io.data2viz.kotlinx.htmlplugin.conversion
 
 
 const val INDENT = "    " // 4 spaces
@@ -12,7 +7,7 @@ fun StringBuilder.addTabIndent(currentIndent: Int) = repeat(currentIndent) { app
 
 fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
     when (this) {
-        is HtmlTag  -> toKotlinx(currentIndent)
+        is HtmlTag -> toKotlinx(currentIndent)
         is HtmlText -> toKotlinx(currentIndent)
         else        -> error("${this.javaClass.typeName} not supported")
     }

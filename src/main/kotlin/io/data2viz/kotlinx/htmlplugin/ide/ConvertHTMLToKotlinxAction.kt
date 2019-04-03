@@ -1,4 +1,4 @@
-package io.data2viz.kotlinx.htmlplugin.ide.controller
+package io.data2viz.kotlinx.htmlplugin.ide
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
@@ -6,9 +6,9 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.command.WriteCommandAction
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlPsiToHtmlDataConverter
+import io.data2viz.kotlinx.htmlplugin.conversion.converToHtmlElements
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 
 
 class ConvertHTMLToKotlinxAction : AnAction("Convert HTML To Kotlinx.html") {

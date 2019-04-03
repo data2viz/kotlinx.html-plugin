@@ -1,4 +1,4 @@
-package io.data2viz.kotlinx.htmlplugin.ide.controller
+package io.data2viz.kotlinx.htmlplugin.ide
 
 import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
@@ -13,13 +13,9 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
-import io.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
-import io.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
-import io.data2viz.kotlinx.htmlplugin.ide.data.htmlDataFlavor
-import io.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlPsiToHtmlDataConverter
+import io.data2viz.kotlinx.htmlplugin.conversion.converToHtmlElements
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 

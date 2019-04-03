@@ -1,7 +1,6 @@
-package io.data2viz.kotlinx.htmlplugin.ide.data
+package io.data2viz.kotlinx.htmlplugin.ide
 
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
-import io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertTextHTMLCopyPasteProcessor
 import java.awt.datatransfer.DataFlavor
 
 

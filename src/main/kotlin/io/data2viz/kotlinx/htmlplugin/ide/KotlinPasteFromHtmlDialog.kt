@@ -1,4 +1,4 @@
-package io.data2viz.kotlinx.htmlplugin.ide.view
+package io.data2viz.kotlinx.htmlplugin.ide
 
 
 import com.intellij.CommonBundle

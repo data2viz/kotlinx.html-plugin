@@ -1,8 +1,8 @@
 package io.data2viz.kotlinx.htmlplugin
 
 import com.intellij.testFramework.LightPlatform4TestCase
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlElement
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlPsiToHtmlDataConverter
 import java.io.File
 
 abstract class ResourcesTest : LightPlatform4TestCase() {

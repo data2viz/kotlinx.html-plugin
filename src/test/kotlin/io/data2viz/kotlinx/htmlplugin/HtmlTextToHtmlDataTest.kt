@@ -1,7 +1,7 @@
 package io.data2viz.kotlinx.htmlplugin
 
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlTag
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlText
 import org.junit.Assert
 import org.junit.Test
 

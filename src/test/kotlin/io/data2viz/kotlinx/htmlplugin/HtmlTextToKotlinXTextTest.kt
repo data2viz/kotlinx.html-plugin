@@ -1,7 +1,7 @@
 package io.data2viz.kotlinx.htmlplugin
 
 
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinx
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 import org.junit.Assert
 import org.junit.Test
 

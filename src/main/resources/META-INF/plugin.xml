@@ -13,13 +13,13 @@ This plugin simplifies the transformation of HTML code to a kotlinx.html project
 
     <extensions defaultExtensionNs="com.intellij">
         <copyPastePostProcessor
-                implementation="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertTextHTMLCopyPasteProcessor"/>
+                implementation="io.data2viz.kotlinx.htmlplugin.ide.ConvertTextHTMLCopyPasteProcessor"/>
     </extensions>
 
 
     <actions>
-        <action id="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinxAction"
-                class="io.data2viz.kotlinx.htmlplugin.ide.controller.ConvertHTMLToKotlinxAction"
+        <action id="io.data2viz.kotlinx.htmlplugin.ide.ConvertHTMLToKotlinxAction"
+                class="io.data2viz.kotlinx.htmlplugin.ide.ConvertHTMLToKotlinxAction"
                 text="Convert HTML To KotlinX"
                 description="Convert selected HTML code to KotlinX code">
             <keyboard-shortcut keymap="$default" first-keystroke="shift meta alt X"/>
