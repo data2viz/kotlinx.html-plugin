@@ -1,7 +1,6 @@
-package io.data2viz.kotlinx.htmlplugin.conversion.model
+package io.data2viz.kotlinx.htmlplugin.conversion
 
 import com.intellij.lang.html.HTMLLanguage
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
@@ -12,20 +11,11 @@ import com.intellij.psi.xml.XmlAttribute
 import com.intellij.psi.xml.XmlDoctype
 import com.intellij.psi.xml.XmlTag
 import com.intellij.psi.xml.XmlText
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlAttribute
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlElement
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlTag
-import io.data2viz.kotlinx.htmlplugin.conversion.data.HtmlText
+import io.data2viz.kotlinx.htmlplugin.ide.debug
+import io.data2viz.kotlinx.htmlplugin.ide.logger
 
 
 object HtmlPsiToHtmlDataConverter {
-
-    private val LOGGER = Logger.getInstance(HtmlPsiToHtmlDataConverter::class.java)
-
-
-    fun convertAttribute(source: XmlAttribute): HtmlAttribute {
-        return HtmlAttribute(source.name, source.value)
-    }
 
     fun convertPsiFileToHtmlTag(psiFile: PsiFile): List<HtmlElement> {
         val result = mutableListOf<HtmlElement>()
@@ -52,7 +42,9 @@ object HtmlPsiToHtmlDataConverter {
         return result
     }
 
-    fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? {
+    private fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
+
+    private fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? {
 
         var htmlElement: HtmlElement? = null
 
@@ -71,7 +63,6 @@ object HtmlPsiToHtmlDataConverter {
             }
 
             is XmlAttribute -> {
-
                 parentHtmlTag?.attributes?.add(convertAttribute(psiElement))
             }
 
@@ -89,9 +80,9 @@ object HtmlPsiToHtmlDataConverter {
     }
 
 
-    fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
+    private fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
-        LOGGER.debug("isStartsWithXmlElement type $psiElement")
+        logger.debug {"isStartsWithXmlElement type $psiElement"}
 
         var isStartsWithXmlElement: Boolean
         when (psiElement) {
@@ -119,28 +110,22 @@ object HtmlPsiToHtmlDataConverter {
             else -> isStartsWithXmlElement = false
         }
 
-        LOGGER.debug("isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}")
+        logger.debug { "isStartsWithXmlElement result=$isStartsWithXmlElement  class ${psiElement.javaClass.name} \n ${psiElement.text}" }
 
         return isStartsWithXmlElement
     }
 
-    fun isLooksLikeHtml(psiFile: PsiFile): Boolean {
+    fun isLooksLikeHtml(psiFile: PsiFile): Boolean = isStartsWithXmlElement(psiFile)
 
-        return isStartsWithXmlElement(psiFile)
-    }
+    fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile =
+            PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
 
-    fun createHtmlFileFromText(project: Project, fileName: String, text: String): PsiFile {
-
-
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        return psiFileFactory.createFileFromText(fileName, HTMLLanguage.INSTANCE, text)
-    }
-
-    fun createHtmlFileFromText(project: Project, text: String): PsiFile {
-
-        val psiFileFactory = PsiFileFactory.getInstance(project)
-        return psiFileFactory.createFileFromText(HTMLLanguage.INSTANCE, text)
-    }
+    fun createHtmlFileFromText(project: Project, text: String): PsiFile =
+            PsiFileFactory
+                    .getInstance(project)
+                    .createFileFromText(HTMLLanguage.INSTANCE, text)
 }
 
 

@@ -1,30 +1,23 @@
-package io.data2viz.kotlinx.htmlplugin.ide.controller
+package io.data2viz.kotlinx.htmlplugin.ide
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.command.WriteCommandAction
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlPsiToHtmlDataConverter
+import io.data2viz.kotlinx.htmlplugin.conversion.converToHtmlElements
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 
 
-open class ConvertHTMLToKotlinXActionKx : AnAction("Convert HTML To KotlinX") {
-
+class ConvertHTMLToKotlinxAction : AnAction("Convert HTML To Kotlinx.html") {
 
     override fun actionPerformed(e: AnActionEvent) {
-
-        LOGGER.debug("actionPerformed")
+        logger.debug { "actionPerformed" }
 
         val editor = e.getRequiredData(CommonDataKeys.EDITOR)
-        val project = e.project
-
-        if (project == null) {
-            return
-        }
+        val project = e.project ?: return
 
         val document = editor.document
         val selectionModel = editor.selectionModel
@@ -44,11 +37,11 @@ open class ConvertHTMLToKotlinXActionKx : AnAction("Convert HTML To KotlinX") {
             return
         }
 
-        val htmlTags = sourcePsiFileFromText.converToHtmlElements()
+        val convertedToKotlinText = sourcePsiFileFromText
+                .converToHtmlElements()
+                .toKotlinx()
 
-        val convertedToKotlinText = htmlTags.toKotlinX()
-
-        if (convertedToKotlinText.isNullOrEmpty()) {
+        if (convertedToKotlinText.isEmpty()) {
             return
         }
 
@@ -57,12 +50,6 @@ open class ConvertHTMLToKotlinXActionKx : AnAction("Convert HTML To KotlinX") {
             document.replaceString(start, end, convertedToKotlinText)
         }
         selectionModel.removeSelection()
-    }
-
-    companion object {
-
-        private val LOGGER = Logger.getInstance(ConvertHTMLToKotlinXActionKx::class.java)
-
     }
 
 }

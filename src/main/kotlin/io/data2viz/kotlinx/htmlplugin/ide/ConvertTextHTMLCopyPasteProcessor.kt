@@ -1,9 +1,10 @@
-package io.data2viz.kotlinx.htmlplugin.ide.controller
+package io.data2viz.kotlinx.htmlplugin.ide
 
 import com.intellij.codeInsight.editorActions.CopyPastePostProcessor
 import com.intellij.codeInsight.editorActions.TextBlockTransferableData
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.diagnostic.debug
 import com.intellij.openapi.editor.CaretStateTransferableData
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.RangeMarker
@@ -13,50 +14,37 @@ import com.intellij.openapi.util.Ref
 import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiFile
 import com.intellij.psi.impl.source.html.HtmlFileImpl
-import io.data2viz.kotlinx.htmlplugin.conversion.model.HtmlPsiToHtmlDataConverter
-import io.data2viz.kotlinx.htmlplugin.conversion.model.converToHtmlElements
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
-import io.data2viz.kotlinx.htmlplugin.ide.data.ExternalFileHtmlTextTransferableData
-import io.data2viz.kotlinx.htmlplugin.ide.data.HtmlTextTransferableData
-import io.data2viz.kotlinx.htmlplugin.ide.view.KotlinPasteFromHtmlDialog
+import io.data2viz.kotlinx.htmlplugin.conversion.HtmlPsiToHtmlDataConverter
+import io.data2viz.kotlinx.htmlplugin.conversion.converToHtmlElements
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
 
+val logger = Logger.getInstance(ConvertTextHTMLCopyPasteProcessor::class.java)
 
-open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBlockTransferableData>() {
 
-
-    companion object {
-
-        private val LOGGER = Logger.getInstance(ConvertTextHTMLCopyPasteProcessorKt::class.java)
+inline fun Logger.debug (lazyMessage: () -> String ) {
+    if (isDebugEnabled) {
+        debug(lazyMessage())
     }
+}
 
-    override fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): MutableList<TextBlockTransferableData> {
 
+class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransferableData>() {
 
-        val resultList = mutableListOf<TextBlockTransferableData>()
-
-        val isHtmlFile = file is HtmlFileImpl
-
-        LOGGER.debug("collectTransferableData isHtmlFile=$isHtmlFile")
-        if (isHtmlFile) {
-            val htmlTextSelection = HtmlTextTransferableData(file.name, file.text, startOffsets, endOffsets, true)
-            resultList.add(htmlTextSelection)
-        }
-
-        return resultList
-
-    }
+    override fun collectTransferableData(file: PsiFile, editor: Editor, startOffsets: IntArray, endOffsets: IntArray): List<TextBlockTransferableData> =
+            when (file) {
+                is HtmlFileImpl -> listOf(HtmlTextTransferableData(file.name, file.text, startOffsets, endOffsets, true))
+                else -> listOf()
+            }
 
     override fun extractTransferableData(content: Transferable): List<TextBlockTransferableData> {
 
-
         val result = mutableListOf<TextBlockTransferableData>()
-
-        val dataFlavor = HtmlTextTransferableData.dataFlavor
+        val dataFlavor = htmlDataFlavor
         val isCopyFromHtmlFile = content.isDataFlavorSupported(dataFlavor)
 
-        LOGGER.debug("extractTransferableData isCopyFromHtmlFile=$isCopyFromHtmlFile")
+        logger.debug {"extractTransferableData isCopyFromHtmlFile=$isCopyFromHtmlFile" }
         if (isCopyFromHtmlFile) {
             val transferableData = content.getTransferData(dataFlavor) as TextBlockTransferableData
             result.add(transferableData)
@@ -66,8 +54,8 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
             val isNotCopyPasteFromIdeaFile = !content.isDataFlavorSupported(CaretStateTransferableData.FLAVOR)
             val isSomeStringContent = content.isDataFlavorSupported(DataFlavor.stringFlavor)
 
-            LOGGER.debug("extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile")
-            LOGGER.debug("extractTransferableData isSomeStringContent=$isSomeStringContent")
+            logger.debug { "extractTransferableData isNotCopyPasteFromIdeaFile=$isNotCopyPasteFromIdeaFile" }
+            logger.debug { "extractTransferableData isSomeStringContent=$isSomeStringContent"}
             if (isNotCopyPasteFromIdeaFile && isSomeStringContent) {
                 val transferableData = content.getTransferData(DataFlavor.stringFlavor)
 
@@ -75,18 +63,21 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
 
                 val external = ExternalFileHtmlTextTransferableData(str)
                 result.add(external)
-
             }
         }
 
-        LOGGER.debug("extractTransferableData result.size=${result.size}")
+        logger.debug {"extractTransferableData result.size=${result.size}"}
         return result
     }
 
-    override fun processTransferableData(project: Project, editor: Editor, bounds: RangeMarker, caretOffset: Int, indented: Ref<Boolean>, textValues: MutableList<TextBlockTransferableData>) {
+    override fun processTransferableData(project: Project, editor: Editor,
+                                         bounds: RangeMarker,
+                                         caretOffset: Int,
+                                         indented: Ref<Boolean>,
+                                         textValues: MutableList<TextBlockTransferableData>) {
 
         val isDump = DumbService.getInstance(project).isDumb
-        LOGGER.debug("processTransferableData isDump=$isDump")
+        logger.debug { "processTransferableData isDump=$isDump" }
         if (isDump) {
             return
         }
@@ -94,7 +85,7 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
 
         val psiDocumentManager = PsiDocumentManager.getInstance(project)
         val targetPsiFile = psiDocumentManager.getPsiFile(editor.document)
-        LOGGER.debug("processTransferableData targetPsiFile=$targetPsiFile")
+        logger.debug { "processTransferableData targetPsiFile=$targetPsiFile" }
 
         if (targetPsiFile == null) {
             return
@@ -103,13 +94,13 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
 
         val textValuesSize = textValues.size
 
-        LOGGER.debug("processTransferableData textValuesSize=$textValuesSize")
+        logger.debug { "processTransferableData textValuesSize=$textValuesSize" }
         if (textValuesSize != 1) {
             return
         }
         val textBlockTransferableData = textValues[0]
 
-        LOGGER.debug("processTransferableData textBlockTransferableData=$textBlockTransferableData")
+        logger.debug { "processTransferableData textBlockTransferableData=$textBlockTransferableData" }
 
         if (textBlockTransferableData !is HtmlTextTransferableData) {
             return
@@ -120,17 +111,17 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
         val text = htmlTextTransferableData.fileText
         val fileName = htmlTextTransferableData.fileName
         val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, fileName, text)
-        LOGGER.debug("processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText")
+        logger.debug { "processTransferableData sourcePsiFileFromText=$sourcePsiFileFromText" }
         if (sourcePsiFileFromText !is HtmlFileImpl) {
             return
         }
 
         val isFromHtmlFile = htmlTextTransferableData.isFromHtmlFile
-        LOGGER.debug("processTransferableData isFromHtmlFile=$isFromHtmlFile")
+        logger.debug { "processTransferableData isFromHtmlFile=$isFromHtmlFile" }
 
         if (!isFromHtmlFile) {
             val looksLikeHtml = HtmlPsiToHtmlDataConverter.isLooksLikeHtml(sourcePsiFileFromText)
-            LOGGER.debug("processTransferableData isLooksLikeHtml=$looksLikeHtml")
+            logger.debug { "processTransferableData isLooksLikeHtml=$looksLikeHtml" }
             if (!looksLikeHtml) {
                 return
             }
@@ -139,24 +130,23 @@ open class ConvertTextHTMLCopyPasteProcessorKt : CopyPastePostProcessor<TextBloc
 
         val htmlElements = sourcePsiFileFromText.converToHtmlElements()
 
-        val convertedToKotlinText = htmlElements.toKotlinX()
+        val convertedToKotlinText = htmlElements.toKotlinx()
 
 
         val notEmpty = convertedToKotlinText.isNotEmpty()
-        LOGGER.debug("processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText")
+        logger.debug { "processTransferableData notEmpty = $notEmpty  convertedToKotlinText=$convertedToKotlinText" }
         if (notEmpty) {
 
 
             val dialogIsOk = KotlinPasteFromHtmlDialog.isOK(project)
-            LOGGER.debug("processTransferableData dialogIsOk=$dialogIsOk")
+            logger.debug { "processTransferableData dialogIsOk=$dialogIsOk" }
             if (!dialogIsOk) {
                 return
             }
 
-
             ApplicationManager.getApplication().runWriteAction {
 
-                LOGGER.debug("processTransferableData runWriteAction")
+                logger.debug { "processTransferableData runWriteAction" }
                 val startOffset = bounds.startOffset
                 editor.document.replaceString(bounds.startOffset, bounds.endOffset, convertedToKotlinText)
                 val endOffsetAfterCopy = startOffset + convertedToKotlinText.length

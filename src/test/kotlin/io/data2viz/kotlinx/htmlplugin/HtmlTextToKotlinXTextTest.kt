@@ -1,7 +1,7 @@
 package io.data2viz.kotlinx.htmlplugin
 
 
-import io.data2viz.kotlinx.htmlplugin.conversion.model.toKotlinX
+import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
 import org.junit.Assert
 import org.junit.Test
 
@@ -56,9 +56,9 @@ class HtmlTextToKotlinXTextTest : ResourcesTest() {
 
         val htmlTags = loadHtmlData(filenameHtml)
 
-        val convertedToKotlinXText = htmlTags.toKotlinX()
+        val convertedToKotlinXText = htmlTags.toKotlinx()
 
-        Assert.assertEquals(kotlinXText, convertedToKotlinXText);
+        Assert.assertEquals(kotlinXText, convertedToKotlinXText)
 
     }
 
