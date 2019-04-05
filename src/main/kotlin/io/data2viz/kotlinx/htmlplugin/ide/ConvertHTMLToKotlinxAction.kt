@@ -31,7 +31,7 @@ class ConvertHTMLToKotlinxAction : AnAction("Convert HTML To Kotlinx.html") {
             return
         }
 
-        val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, text)
+        val sourcePsiFileFromText: PsiFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, text!!)
 
         if (sourcePsiFileFromText !is HtmlFileImpl) {
             return
