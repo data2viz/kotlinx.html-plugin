@@ -9,7 +9,18 @@
 This plugin simplifies the transformation of HTML code to a kotlinx.html project by automatically doing the conversion during a copy/paste.
     ]]></description>
 
-    <depends>com.intellij.modules.lang</depends>
+    <change-notes>
+  <![CDATA[
+        <h4>1.0.1 2019-04-05</h4>
+        <ul>
+            <li>Align Kotlin version on Intellij 2018</li>
+        </ul>
+    ]]>
+</change-notes>
+
+
+    <depends>com.intellij.modules.java</depends>
+    <depends>org.jetbrains.kotlin</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <copyPastePostProcessor
