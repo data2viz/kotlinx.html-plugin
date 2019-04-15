@@ -18,14 +18,13 @@ object HtmlPsiToHtmlDataConverter {
         val result = mutableListOf<HtmlElement>()
         for (child in psiFile.children) {
             when (child) {
-                is HtmlDocumentImpl -> {
-                    for (docChild in child.children) {
-                        val htmlTag = convertPsiElementToHtmlElement(docChild)
-                        if (htmlTag != null) {
-                            result.add(htmlTag)
+                is HtmlDocumentImpl -> child
+                        .children
+                        .forEach {
+                            convertPsiElementToHtmlElement(it)?.let {
+                                result.add(it)
+                            }
                         }
-                    }
-                }
                 else -> {
                     val htmlTag = convertPsiElementToHtmlElement(child)
                     if (htmlTag != null) {
@@ -39,43 +38,33 @@ object HtmlPsiToHtmlDataConverter {
         return result
     }
 
-    private fun convertAttribute(source: XmlAttribute): HtmlAttribute = HtmlAttribute(source.name, source.value)
 
-    private fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? {
+    private fun convertPsiElementToHtmlElement(psiElement: PsiElement, parentHtmlTag: HtmlTag? = null): HtmlElement? =
+            when (psiElement) {
+                is XmlTag -> {
 
-        var htmlElement: HtmlElement? = null
+                    val htmlElement = HtmlTag(psiElement.name)
 
-        when (psiElement) {
-            is XmlTag -> {
+                    psiElement.children
+                            .mapNotNull { convertPsiElementToHtmlElement(it, htmlElement) }
+                            .forEach { htmlElement.children += it }
 
-                htmlElement = HtmlTag(psiElement.name)
+                    htmlElement
 
-                for (childPsi in psiElement.children) {
-                    val childHtmlElement = convertPsiElementToHtmlElement(childPsi, htmlElement)
-                    if (childHtmlElement != null) {
-                        htmlElement.children.add(childHtmlElement)
-                    }
                 }
 
-            }
-
-            is XmlAttribute -> {
-                parentHtmlTag?.attributes?.add(convertAttribute(psiElement))
-            }
-
-            is XmlText -> {
-                val text = psiElement.text.trim()
-                if (text.isNotEmpty()) {
-                    htmlElement = HtmlText(text)
+                is XmlAttribute -> {
+                    parentHtmlTag?.attributes?.add(psiElement.toHtmlAttribute())
+                    null
                 }
+
+                is XmlText  -> psiElement.text.toHtmlText()
+                else        -> null
             }
 
-        }
+    private fun XmlAttribute.toHtmlAttribute(): HtmlAttribute = HtmlAttribute(name, value)
 
-        return htmlElement
-
-    }
-
+    private fun String.toHtmlText(): HtmlText? = if (trim().isEmpty()) null else HtmlText(trim())
 
     private fun isStartsWithXmlElement(psiElement: PsiElement): Boolean {
 
