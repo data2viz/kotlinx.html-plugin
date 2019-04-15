@@ -31,8 +31,14 @@ fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
         }
     }
 
+    if(!custom) {
+        custom = isCustomSpecialForTag(tag)
+    }
+
     return custom
 }
+
+fun HtmlAttribute.isCustomSpecialForTag(tag: HtmlTag): Boolean = tag.tagName == "abbr" && attrName == "title"
 
 fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     val inline = isInline()
@@ -64,7 +70,12 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
             .filter { it.isCustomForTag(this) }
             .forEach { attribute ->
                 sb.addTabIndent(currentIndent + 1)
-                sb.append(attribute.toKotlinxCustomAttribute())
+                if(attribute.isCustomSpecialForTag(this)) {
+                    sb.append(attribute.toKotlinxSpecialAttribute())
+
+                } else {
+                    sb.append(attribute.toKotlinxCustomAttribute())
+                }
                 sb.append("\n")
             }
 
@@ -116,4 +127,10 @@ fun HtmlAttribute.toKotlinxCustomAttribute(): String =
         when {
             value != null   -> """attributes["$attrName"] = "$value" """.trim()
             else            -> """attributes["$attrName"] = "true" """.trim()
+        }
+
+fun HtmlAttribute.toKotlinxSpecialAttribute(): String =
+        when {
+            value != null   -> """$attrName = "$value" """.trim()
+            else            -> """$attrName = "true" """.trim()
         }
