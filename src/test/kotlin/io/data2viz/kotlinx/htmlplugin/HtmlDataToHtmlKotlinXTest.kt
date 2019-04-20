@@ -87,16 +87,6 @@ class HtmlDataToHtmlKotlinXTest {
 
 
     @Test
-    fun HtmlTagtoKotlinXBaseAttributes() {
-        val htmlTag = HtmlTag("div")
-        htmlTag.attributes.add(HtmlAttribute("attr1"))
-        htmlTag.attributes.add(HtmlAttribute("attr2", "value2"))
-
-        Assert.assertEquals("div(attr1 = \"true\", attr2 = \"value2\") {\n}", htmlTag.toKotlinx())
-    }
-
-
-    @Test
     fun HtmlTagtoKotlinXCustomAttributes() {
         val htmlTag = HtmlTag("div")
 

@@ -6,11 +6,11 @@ const val INDENT = "    " // 4 spaces
 fun StringBuilder.addTabIndent(currentIndent: Int) = repeat(currentIndent) { append(INDENT) }
 
 fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
-    when (this) {
-        is HtmlTag  -> toKotlinx(currentIndent)
-        is HtmlText -> toKotlinxText(currentIndent)
-        else        -> error("${this.javaClass.typeName} not supported")
-    }
+        when (this) {
+            is HtmlTag -> toKotlinx(currentIndent)
+            is HtmlText -> toKotlinxText(currentIndent)
+            else -> error("${this.javaClass.typeName} not supported")
+        }
 
 /**
  * Tags with only one text child is inline
@@ -31,14 +31,9 @@ fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
         }
     }
 
-    if(!custom) {
-        custom = isCustomSpecialForTag(tag)
-    }
-
     return custom
 }
 
-fun HtmlAttribute.isCustomSpecialForTag(tag: HtmlTag): Boolean = tag.tagName == "abbr" && attrName == "title"
 
 fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     val inline = isInline()
@@ -47,19 +42,6 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     sb.addTabIndent(currentIndent)
     sb.append(tagName)
 
-    val defaultAttributes = attributes.filter { !it.isCustomForTag(this) }
-
-    if (defaultAttributes.isNotEmpty()) {
-        sb.append("(")
-        val lastIndex = defaultAttributes.size - 1
-        for ((index, attribute) in defaultAttributes.withIndex()) {
-            sb.append(attribute.toKotlinx())
-            if (index != lastIndex) {
-                sb.append(", ")
-            }
-        }
-        sb.append(")")
-    }
 
     sb.append(" {")
     if (!inline) {
@@ -67,14 +49,13 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     }
 
     attributes
-            .filter { it.isCustomForTag(this) }
             .forEach { attribute ->
-                sb.addTabIndent(currentIndent + 1)
-                if(attribute.isCustomSpecialForTag(this)) {
-                    sb.append(attribute.toKotlinxSpecialAttribute())
 
-                } else {
+                sb.addTabIndent(currentIndent + 1)
+                if (attribute.isCustomForTag(this)) {
                     sb.append(attribute.toKotlinxCustomAttribute())
+                } else {
+                    sb.append(attribute.toKotlinx())
                 }
                 sb.append("\n")
             }
@@ -99,10 +80,10 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 
 
 fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
-    StringBuilder().apply {
-        addTabIndent(currentIndent)
-        append("""+ "${escapeChars(text)}"""")
-    }.toString()
+        StringBuilder().apply {
+            addTabIndent(currentIndent)
+            append("""+ "${escapeChars(text)}"""")
+        }.toString()
 
 fun escapeChars(text: String): String = text.replace("\"", "\\\"")
 
@@ -112,25 +93,32 @@ fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
 
 fun HtmlAttribute.toKotlinx(): String {
     // remap for kotlinx
+    val attrValue = when (attrName) {
+        "class" -> convertClassesStringToClassSetKotlinx(value ?: "")
+        else -> """"$value""""
+    }
     val attrName = when (attrName) {
         "class" -> "classes"
         else -> attrName
     }
 
+
     return when {
-        value != null   -> """$attrName = "$value" """.trim()
-        else            -> """$attrName = "true" """.trim()
+        value != null -> """$attrName = $attrValue""".trim()
+        else -> """$attrName = "true" """.trim()
     }
+
 }
+
+fun convertClassesStringToClassSetKotlinx(classString: String): String =
+        """setOf(${classString.split(' ').joinToString(
+                separator = ", ",
+                prefix = "\"",
+                postfix = "\""
+        )})"""
 
 fun HtmlAttribute.toKotlinxCustomAttribute(): String =
         when {
-            value != null   -> """attributes["$attrName"] = "$value" """.trim()
-            else            -> """attributes["$attrName"] = "true" """.trim()
-        }
-
-fun HtmlAttribute.toKotlinxSpecialAttribute(): String =
-        when {
-            value != null   -> """$attrName = "$value" """.trim()
-            else            -> """$attrName = "true" """.trim()
+            value != null -> """attributes["$attrName"] = "$value" """.trim()
+            else -> """attributes["$attrName"] = "true" """.trim()
         }
