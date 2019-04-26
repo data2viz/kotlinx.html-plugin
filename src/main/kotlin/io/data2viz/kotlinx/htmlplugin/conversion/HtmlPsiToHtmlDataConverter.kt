@@ -7,10 +7,7 @@ import com.intellij.psi.PsiFile
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.impl.source.html.HtmlDocumentImpl
 import com.intellij.psi.impl.source.html.HtmlFileImpl
-import com.intellij.psi.xml.XmlAttribute
-import com.intellij.psi.xml.XmlDoctype
-import com.intellij.psi.xml.XmlTag
-import com.intellij.psi.xml.XmlText
+import com.intellij.psi.xml.*
 import io.data2viz.kotlinx.htmlplugin.ide.debug
 import io.data2viz.kotlinx.htmlplugin.ide.logger
 
@@ -85,6 +82,12 @@ object HtmlPsiToHtmlDataConverter {
                         isStartsWithXmlElement = isStartsWithXmlElement(child)
                         if (isStartsWithXmlElement) {
                             break
+                        } else {
+                            if(child is XmlToken) {
+                                // it looks like "client.request<String> {" which is not valid html code
+                                isStartsWithXmlElement = false
+                                break
+                            }
                         }
                     }
 
