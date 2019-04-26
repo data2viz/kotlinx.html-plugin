@@ -32,6 +32,11 @@ intellij {
         // sinceBuild is inferred from the version above
     }}
 
+publishPlugin {
+    username intellijPublishUsername
+    password intellijPublishPassword
+}
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
