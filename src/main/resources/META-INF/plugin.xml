@@ -11,6 +11,11 @@ This plugin simplifies the transformation of HTML code to a kotlinx.html project
 
     <change-notes>
   <![CDATA[
+        <h4>1.0.2 2019-04-26</h4>
+        <ul>
+            <li>Fix #7: attributes should be converted into code inside the block.</li>
+            <li>Fix #6: the plugin shouldn't apply for Kotlin code with generics.</li>
+        </ul>
         <h4>1.0.1 2019-04-05</h4>
         <ul>
             <li>Align Kotlin version on Intellij 2018</li>
