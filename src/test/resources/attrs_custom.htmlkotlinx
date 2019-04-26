@@ -1,4 +1,5 @@
-link(attr2 = "value2") {
+link {
     attributes["integrity"] = "value"
     attributes["aria-label"] = "value"
+    attr2 = "value2"
 }
