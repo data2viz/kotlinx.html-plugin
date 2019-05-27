@@ -42,3 +42,4 @@ node_modules/
 libraries/tools/kotlin-test-nodejs-runner/lib/
 local.properties
 uiDesigner.xml
+gradle.properties

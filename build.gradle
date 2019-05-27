@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'io.data2viz'
-version '1.0'
+version '1.0.2'
 
 sourceCompatibility = 1.8
 
@@ -31,6 +31,11 @@ intellij {
         untilBuild = "" // Be forward compatible
         // sinceBuild is inferred from the version above
     }}
+
+publishPlugin {
+    username intellijPublishUsername
+    password intellijPublishPassword
+}
 
 compileKotlin {
     kotlinOptions {
