@@ -50,6 +50,15 @@ class HtmlTextToKotlinXTextTest : ResourcesTest() {
         assertFiles("nested_several_text_childs.html", "nested_several_text_childs.htmlkotlinx")
     }
 
+    @Test
+    fun FileHtmlToKotlinXTextarea() {
+        assertFiles("textarea.html", "textarea.htmlkotlinx")
+    }
+    @Test
+    fun FileHtmlToKotlinXUppercase() {
+        assertFiles("uppercase.html", "uppercase.htmlkotlinx")
+    }
+
     private fun assertFiles(filenameHtml: String, filenameKotlinX: String) {
 
         val kotlinXText = loadFileText(filenameKotlinX)
