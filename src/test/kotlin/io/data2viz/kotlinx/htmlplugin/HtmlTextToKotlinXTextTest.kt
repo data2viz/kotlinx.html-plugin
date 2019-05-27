@@ -50,6 +50,11 @@ class HtmlTextToKotlinXTextTest : ResourcesTest() {
         assertFiles("nested_several_text_childs.html", "nested_several_text_childs.htmlkotlinx")
     }
 
+    @Test
+    fun FileHtmlToKotlinXClasses() {
+        assertFiles("attrs_class.html", "attrs_class.htmlkotlinx")
+    }
+
     private fun assertFiles(filenameHtml: String, filenameKotlinX: String) {
 
         val kotlinXText = loadFileText(filenameKotlinX)

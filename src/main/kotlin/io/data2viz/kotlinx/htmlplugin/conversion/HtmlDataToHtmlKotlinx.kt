@@ -112,7 +112,7 @@ fun HtmlAttribute.toKotlinx(): String {
 
 fun convertClassesStringToClassSetKotlinx(classString: String): String =
         """setOf(${classString.split(' ').joinToString(
-                separator = ", ",
+                separator = "\", \"",
                 prefix = "\"",
                 postfix = "\""
         )})"""
