@@ -82,10 +82,10 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
         StringBuilder().apply {
             addTabIndent(currentIndent)
-            append("""+ "${escapeChars(text)}"""")
+            append("+ \"\"\"$text\"\"\"")
         }.toString()
 
-fun escapeChars(text: String): String = text.replace("\"", "\\\"")
+
 
 
 fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =

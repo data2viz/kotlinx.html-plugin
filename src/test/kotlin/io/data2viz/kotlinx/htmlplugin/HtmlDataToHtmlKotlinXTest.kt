@@ -63,7 +63,7 @@ class HtmlDataToHtmlKotlinXTest {
     fun HtmlTagtoKotlinXInline() {
         val htmlTag = HtmlTag("div")
         htmlTag.children.add(HtmlText("text"))
-        Assert.assertEquals("div { + \"text\"}", htmlTag.toKotlinx())
+        Assert.assertEquals("div { + \"\"\"text\"\"\"}", htmlTag.toKotlinx())
     }
 
 
