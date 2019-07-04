@@ -40,7 +40,14 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
     sb.addTabIndent(currentIndent)
-    sb.append(tagName)
+    val tagNameLowerCase = tagName.toLowerCase()
+
+    val kotlinXTagName = when(tagNameLowerCase) {
+        "textarea" -> "textArea"
+        else -> tagNameLowerCase
+    }
+
+    sb.append(kotlinXTagName)
 
 
     sb.append(" {")
@@ -82,10 +89,10 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
         StringBuilder().apply {
             addTabIndent(currentIndent)
-            append("""+ "${escapeChars(text)}"""")
+            append("+ \"\"\"$text\"\"\"")
         }.toString()
 
-fun escapeChars(text: String): String = text.replace("\"", "\\\"")
+
 
 
 fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
@@ -93,13 +100,14 @@ fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
 
 fun HtmlAttribute.toKotlinx(): String {
     // remap for kotlinx
-    val attrValue = when (attrName) {
+    val attrNameLowerCase = attrName.toLowerCase()
+    val attrValue = when (attrNameLowerCase) {
         "class" -> convertClassesStringToClassSetKotlinx(value ?: "")
         else -> """"$value""""
     }
-    val attrName = when (attrName) {
+    val attrName = when (attrNameLowerCase) {
         "class" -> "classes"
-        else -> attrName
+        else -> attrNameLowerCase
     }
 
 
@@ -112,7 +120,7 @@ fun HtmlAttribute.toKotlinx(): String {
 
 fun convertClassesStringToClassSetKotlinx(classString: String): String =
         """setOf(${classString.split(' ').joinToString(
-                separator = ", ",
+                separator = "\", \"",
                 prefix = "\"",
                 postfix = "\""
         )})"""
