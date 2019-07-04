@@ -1,3 +1,2 @@
-div {
-    classes = setOf("one", "two")
+div(classes = "one two") {
 }

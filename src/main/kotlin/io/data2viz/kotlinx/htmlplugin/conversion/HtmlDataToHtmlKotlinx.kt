@@ -34,6 +34,17 @@ fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
     return custom
 }
 
+fun Collection<HtmlAttribute>.filterConstructorAttributes(): List<HtmlAttribute> =
+        filter { it.isConstructorAttribute() }
+fun Collection<HtmlAttribute>.filterBodyAttributes(): List<HtmlAttribute> =
+        filter { !it.isConstructorAttribute() }
+
+
+fun HtmlAttribute.isConstructorAttribute(): Boolean = when (attrName) {
+    "class" -> true
+    else -> false
+}
+
 
 fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     val inline = isInline()
@@ -42,7 +53,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     sb.addTabIndent(currentIndent)
     val tagNameLowerCase = tagName.toLowerCase()
 
-    val kotlinXTagName = when(tagNameLowerCase) {
+    val kotlinXTagName = when (tagNameLowerCase) {
         "textarea" -> "textArea"
         else -> tagNameLowerCase
     }
@@ -50,22 +61,35 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     sb.append(kotlinXTagName)
 
 
+    val constructorAttributes = attributes.filterConstructorAttributes()
+
+    if (!constructorAttributes.isEmpty()) {
+        sb.append("(")
+
+        sb.append(constructorAttributes.joinToString(", ") { attribute ->
+            attribute.toKotlinx()
+        })
+
+        sb.append(")")
+    }
+
+
     sb.append(" {")
     if (!inline) {
         sb.append("\n")
     }
 
-    attributes
-            .forEach { attribute ->
+    attributes.filterBodyAttributes().forEach { attribute ->
+        sb.addTabIndent(currentIndent + 1)
+        if (attribute.isCustomForTag(this)) {
+            sb.append(attribute.toKotlinxCustomAttribute())
+        } else {
+            sb.append(attribute.toKotlinx())
+        }
+        sb.append("\n")
+    }
 
-                sb.addTabIndent(currentIndent + 1)
-                if (attribute.isCustomForTag(this)) {
-                    sb.append(attribute.toKotlinxCustomAttribute())
-                } else {
-                    sb.append(attribute.toKotlinx())
-                }
-                sb.append("\n")
-            }
+
 
     for (child in children) {
         if (!inline) {
@@ -93,18 +117,13 @@ fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
         }.toString()
 
 
-
-
 fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
         joinToString("\n") { it.toKotlinx(currentIndent) }
 
 fun HtmlAttribute.toKotlinx(): String {
     // remap for kotlinx
     val attrNameLowerCase = attrName.toLowerCase()
-    val attrValue = when (attrNameLowerCase) {
-        "class" -> convertClassesStringToClassSetKotlinx(value ?: "")
-        else -> """"$value""""
-    }
+    val attrValue = """"$value""""
     val attrName = when (attrNameLowerCase) {
         "class" -> "classes"
         else -> attrNameLowerCase
@@ -117,13 +136,6 @@ fun HtmlAttribute.toKotlinx(): String {
     }
 
 }
-
-fun convertClassesStringToClassSetKotlinx(classString: String): String =
-        """setOf(${classString.split(' ').joinToString(
-                separator = "\", \"",
-                prefix = "\"",
-                postfix = "\""
-        )})"""
 
 fun HtmlAttribute.toKotlinxCustomAttribute(): String =
         when {
