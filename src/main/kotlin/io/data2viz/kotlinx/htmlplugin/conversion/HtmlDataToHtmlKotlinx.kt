@@ -15,7 +15,7 @@ fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
 /**
  * Tags with only one text child is inline
  */
-fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText
+fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText && attributes.filterBodyAttributes().isEmpty()
 
 /**
  * Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
