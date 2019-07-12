@@ -1,0 +1,7 @@
+form {
+    action = "/action_page.php"
+    label {
+        htmlFor = "male"
+        + """Male"""
+    }
+}

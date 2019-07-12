@@ -46,6 +46,11 @@ class HtmlTextToKotlinXTextTest : ResourcesTest() {
     }
 
     @Test
+    fun FileHtmlToKotlinXHtmlFor() {
+        assertFiles("htmlFor.html", "htmlFor.htmlkotlinx")
+    }
+
+    @Test
     fun FileHtmlToKotlinXNestedSeveralTextChilds() {
         assertFiles("nested_several_text_childs.html", "nested_several_text_childs.htmlkotlinx")
     }
