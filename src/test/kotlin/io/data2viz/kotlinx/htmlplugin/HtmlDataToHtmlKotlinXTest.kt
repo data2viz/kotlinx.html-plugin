@@ -88,7 +88,7 @@ class HtmlDataToHtmlKotlinXTest {
         htmlTag.children.add(HtmlText("one\r\ntwo"))
         Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
         htmlTag.children.clear()
-        htmlTag.children.add(HtmlText("one\rtwo"))
+        htmlTag.children.add(HtmlText("one\n\rtwo"))
         Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
     }
 
