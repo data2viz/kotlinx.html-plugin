@@ -15,7 +15,7 @@ fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
 /**
  * Tags with only one text child is inline
  */
-fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText
+fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText && attributes.filterBodyAttributes().isEmpty()
 
 /**
  * Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
@@ -67,7 +67,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
         sb.append("(")
 
         sb.append(constructorAttributes.joinToString(", ") { attribute ->
-            attribute.toKotlinx()
+            attribute.toKotlinx(this)
         })
 
         sb.append(")")
@@ -84,7 +84,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
         if (attribute.isCustomForTag(this)) {
             sb.append(attribute.toKotlinxCustomAttribute())
         } else {
-            sb.append(attribute.toKotlinx())
+            sb.append(attribute.toKotlinx(this))
         }
         sb.append("\n")
     }
@@ -120,13 +120,24 @@ fun HtmlText.toKotlinxText(currentIndent: Int = 0): String =
 fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
         joinToString("\n") { it.toKotlinx(currentIndent) }
 
-fun HtmlAttribute.toKotlinx(): String {
+fun HtmlAttribute.toKotlinx(owner: HtmlTag? = null): String {
     // remap for kotlinx
     val attrNameLowerCase = attrName.toLowerCase()
     val attrValue = """"$value""""
-    val attrName = when (attrNameLowerCase) {
+    var attrName = when (attrNameLowerCase) {
         "class" -> "classes"
         else -> attrNameLowerCase
+    }
+
+    // remap for by owner tag name
+    if(owner != null) {
+        when(owner.tagName.toLowerCase()) {
+            "label" -> {
+                when(attrNameLowerCase) {
+                    "for" -> attrName = "htmlFor"
+                }
+            }
+        }
     }
 
 
