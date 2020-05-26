@@ -33,8 +33,7 @@ intellij {
     }}
 
 publishPlugin {
-    username intellijPublishUsername
-    password intellijPublishPassword
+    token ORG_GRADLE_PROJECT_intellijPublishToken
 }
 
 compileKotlin {
