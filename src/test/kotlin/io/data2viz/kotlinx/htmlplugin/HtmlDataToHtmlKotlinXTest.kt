@@ -7,6 +7,7 @@ import io.data2viz.kotlinx.htmlplugin.conversion.INDENT
 import io.data2viz.kotlinx.htmlplugin.conversion.isCustomForTag
 import io.data2viz.kotlinx.htmlplugin.conversion.isInline
 import io.data2viz.kotlinx.htmlplugin.conversion.toKotlinx
+import io.data2viz.kotlinx.htmlplugin.ide.replaceInvalidLineSeparators
 import org.junit.Assert
 import org.junit.Test
 
@@ -73,6 +74,22 @@ class HtmlDataToHtmlKotlinXTest {
         htmlTag.children.add(HtmlTag("p"))
         htmlTag.children.add(HtmlTag("span"))
         Assert.assertEquals("div {\n${INDENT}p {\n$INDENT}\n${INDENT}span {\n$INDENT}\n}", htmlTag.toKotlinx())
+    }
+
+    @Test
+    fun InvalidLineSeparatorsReplaceTest() {
+        val htmlTag = HtmlTag("div")
+        htmlTag.children.add(HtmlText("one\ntwo"))
+        Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
+        htmlTag.children.clear()
+        htmlTag.children.add(HtmlText("one\rtwo"))
+        Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
+        htmlTag.children.clear()
+        htmlTag.children.add(HtmlText("one\r\ntwo"))
+        Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
+        htmlTag.children.clear()
+        htmlTag.children.add(HtmlText("one\rtwo"))
+        Assert.assertEquals("div { + \"\"\"one\ntwo\"\"\"}", htmlTag.toKotlinx().replaceInvalidLineSeparators())
     }
 
 

@@ -150,7 +150,7 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
 
         val htmlElements = sourcePsiFileFromText.converToHtmlElements()
 
-        val convertedToKotlinText = htmlElements.toKotlinx()
+        val convertedToKotlinText = htmlElements.toKotlinx().replaceInvalidLineSeparators()
 
 
         val notEmpty = convertedToKotlinText.isNotEmpty()
@@ -180,4 +180,18 @@ class ConvertTextHTMLCopyPasteProcessor : CopyPastePostProcessor<TextBlockTransf
         }
     }
 
+}
+
+val invalidLineSeparatorsRegex = Regex("(\r\n|\n\r|\r|\n)")
+/**
+ *
+ * Starting from 2019.2 IDEA don't like '\r' new lines
+ * Fix for <a href="https://github.com/data2viz/kotlinx.html-plugin/issues/18">18 issue</a>
+ * See [com.intellij.openapi.util.text.StringUtil.assertValidSeparators]
+ * Actually, '\r' and '\n' is new line characters with
+ * <a href="https://stackoverflow.com/questions/15433188/r-n-r-and-n-what-is-the-difference-between-them/">small difference</a>
+ * Formatting difference is doesn't matter because plugin apply new formatting after conversion
+ */
+fun String.replaceInvalidLineSeparators(): String {
+    return replace(invalidLineSeparatorsRegex, "\n")
 }
