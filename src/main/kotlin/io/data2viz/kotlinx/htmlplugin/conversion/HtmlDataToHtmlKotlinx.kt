@@ -15,7 +15,10 @@ fun HtmlElement.toKotlinx(currentIndent: Int = 0): String =
 /**
  * Tags with only one text child is inline
  */
-fun HtmlTag.isInline(): Boolean = children.size == 1 && children[0] is HtmlText && attributes.filterBodyAttributes().isEmpty()
+fun HtmlTag.isInline(): Boolean =
+        children.size == 1 &&
+        children[0] is HtmlText &&
+        attributes.filterBodyAttributes().isEmpty()
 
 /**
  * Custom attributes, which not supported by KotlinX as fields, for example data-* or aria-*
@@ -36,6 +39,7 @@ fun HtmlAttribute.isCustomForTag(tag: HtmlTag): Boolean {
 
 fun Collection<HtmlAttribute>.filterConstructorAttributes(): List<HtmlAttribute> =
         filter { it.isConstructorAttribute() }
+
 fun Collection<HtmlAttribute>.filterBodyAttributes(): List<HtmlAttribute> =
         filter { !it.isConstructorAttribute() }
 
@@ -63,12 +67,21 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 
     val constructorAttributes = attributes.filterConstructorAttributes()
 
-    if (!constructorAttributes.isEmpty()) {
+    if (constructorAttributes.isNotEmpty()) {
         sb.append("(")
 
-        sb.append(constructorAttributes.joinToString(", ") { attribute ->
-            attribute.toKotlinx(this)
-        })
+
+        if (tagNameLowerCase in tagsWithOnlyClasses
+                && constructorAttributes.size == 1
+                && constructorAttributes[0].attrName.toLowerCase() == "class") {
+            sb.append(""""${constructorAttributes[0].value}"""")
+
+        } else {
+            sb.append(constructorAttributes.joinToString(", ") { attribute ->
+                attribute.toKotlinx(this)
+            })
+        }
+
 
         sb.append(")")
     }
@@ -156,3 +169,95 @@ fun HtmlAttribute.toKotlinxCustomAttribute(): String =
 
 
 
+val tagsWithOnlyClasses = """
+abbr
+address
+article
+aside
+audio
+b
+base
+bdi
+bdo
+blockQuote
+body
+br
+canvas
+canvas
+caption
+cite
+code
+col
+colGroup
+dataList
+dd
+del
+details
+dfn
+dialog
+div
+dl
+dt
+em
+embed
+fieldSet
+figcaption
+figure
+footer
+h1
+h2
+h3
+h4
+h5
+h6
+header
+hGroup
+hr
+i
+ins
+kbd
+label
+legend
+li
+main
+mark
+math
+mathml
+mathml
+meter
+nav
+noScript
+htmlObject
+ol
+option
+option
+output
+p
+pre
+progress
+q
+rp
+rt
+ruby
+samp
+section
+select
+small
+source
+span
+strong
+sub
+sup
+svg
+svg
+table
+tbody
+td
+tfoot
+thead
+time
+tr
+ul
+htmlVar
+video
+""".trimIndent().lines().toSet()

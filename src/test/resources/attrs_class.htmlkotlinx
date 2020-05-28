@@ -1,2 +1,4 @@
-div(classes = "one two") {
+div("one two") {
+    button(classes = "btn") {
+    }
 }
