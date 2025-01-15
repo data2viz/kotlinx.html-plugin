@@ -55,7 +55,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
     val sb = StringBuilder()
 
     sb.addTabIndent(currentIndent)
-    val tagNameLowerCase = tagName.toLowerCase()
+    val tagNameLowerCase = tagName.lowercase()
 
     val kotlinXTagName = when (tagNameLowerCase) {
         "textarea" -> "textArea"
@@ -73,7 +73,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 
         if (tagNameLowerCase in tagsWithOnlyClasses
                 && constructorAttributes.size == 1
-                && constructorAttributes[0].attrName.toLowerCase() == "class") {
+                && constructorAttributes[0].attrName.lowercase() == "class") {
             sb.append(""""${constructorAttributes[0].value}"""")
 
         } else {
@@ -106,7 +106,7 @@ fun HtmlTag.toKotlinx(currentIndent: Int = 0): String {
 
     for (child in children) {
         if (!inline) {
-            sb.appendln(child.toKotlinx(currentIndent + 1))
+            sb.appendLine(child.toKotlinx(currentIndent + 1))
         } else {
 
             // add space before + inline
@@ -135,7 +135,7 @@ fun Collection<HtmlElement>.toKotlinx(currentIndent: Int = 0): String =
 
 fun HtmlAttribute.toKotlinx(owner: HtmlTag? = null): String {
     // remap for kotlinx
-    val attrNameLowerCase = attrName.toLowerCase()
+    val attrNameLowerCase = attrName.lowercase()
     val attrValue = """"$value""""
     var attrName = when (attrNameLowerCase) {
         "class" -> "classes"
@@ -144,7 +144,7 @@ fun HtmlAttribute.toKotlinx(owner: HtmlTag? = null): String {
 
     // remap for by owner tag name
     if(owner != null) {
-        when(owner.tagName.toLowerCase()) {
+        when(owner.tagName.lowercase()) {
             "label" -> {
                 when(attrNameLowerCase) {
                     "for" -> attrName = "htmlFor"
