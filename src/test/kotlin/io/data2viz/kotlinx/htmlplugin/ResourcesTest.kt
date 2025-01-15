@@ -12,7 +12,7 @@ abstract class ResourcesTest : LightPlatform4TestCase() {
 
         val htmlText = loadFileText(filenameHtml)
 
-        val psiHtmlFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(ourProject, filenameHtml, htmlText)
+        val psiHtmlFile = HtmlPsiToHtmlDataConverter.createHtmlFileFromText(project, filenameHtml, htmlText)
 
         return HtmlPsiToHtmlDataConverter.convertPsiFileToHtmlTag(psiHtmlFile)
 

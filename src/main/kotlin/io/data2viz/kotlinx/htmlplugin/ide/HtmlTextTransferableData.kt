@@ -14,8 +14,8 @@ open class HtmlTextTransferableData(val fileName: String,
 
     override fun getFlavor(): DataFlavor = htmlDataFlavor
     override fun getOffsetCount(): Int = 0
-    override fun getOffsets(offsets: IntArray?, index: Int): Int = index
-    override fun setOffsets(offsets: IntArray?, index: Int): Int = index
+    override fun getOffsets(offsets: IntArray, index: Int): Int = index
+    override fun setOffsets(offsets: IntArray, index: Int): Int = index
 
 }
 
