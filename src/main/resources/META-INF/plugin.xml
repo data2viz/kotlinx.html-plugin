@@ -15,9 +15,7 @@ doing the conversion during a copy/paste.
     <change-notes>
   <![CDATA[
         <ul>
-            <li>Fix #20: "classes" should be treated as a special parameter</li>
-            <li>Fix #16: label.for attribute should be converted in htmlFor</li>
-            <li>Fix #18: Parse error on windows and IntelliJ 2019.2 </li>
+        <li>Fix issue #22: K2 compatibility issue</li>
         </ul>
     ]]>
 </change-notes>

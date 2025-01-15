@@ -46,7 +46,6 @@ tasks {
     }
     patchPluginXml {
         sinceBuild.set("243")
-        untilBuild.set("")
     }
 
     publishPlugin {
