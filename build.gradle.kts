@@ -27,17 +27,17 @@ intellijPlatform {
     pluginConfiguration {
         name = "HTML to kotlinx.html"
         group = "io.data2viz"
-        version = "1.1.0"
+        version = createProjectVersion()
     }
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks {
@@ -45,10 +45,29 @@ tasks {
         useJUnit()
     }
     patchPluginXml {
-        sinceBuild.set("243")
+        sinceBuild = "243"
+        untilBuild = provider { null } // unset for the latest IDE version, see: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-p   lugin-extension.html#intellijPlatform-pluginConfiguration-ideaVersion-untilBuild
     }
 
     publishPlugin {
         token.set(project.findProperty("intellijPublishToken") as String?)
     }
+}
+
+
+fun createProjectVersion(): String {
+// get version from gradle.properties
+    val versionMajor: String by project
+    val versionMinor: String by project
+
+    var projectVersion = "$versionMajor.$versionMinor-SNAPSHOT"
+
+    // get variables from github action workflow run (CI)
+    val githubRef = System.getenv("GITHUB_REF")
+    val githubRunNumber = System.getenv("GITHUB_RUN_NUMBER")
+    if (githubRef == "refs/heads/main" && githubRunNumber != null) {
+        // if run on CI set the version to the github run number
+        projectVersion = "$versionMajor.$versionMinor.$githubRunNumber"
+    }
+    return projectVersion
 }
