@@ -65,7 +65,7 @@ fun createProjectVersion(): String {
     // get variables from github action workflow run (CI)
     val githubRef = System.getenv("GITHUB_REF")
     val githubRunNumber = System.getenv("GITHUB_RUN_NUMBER")
-    if (githubRef == "refs/heads/main" && githubRunNumber != null) {
+    if (githubRef == "refs/heads/master" && githubRunNumber != null) {
         // if run on CI set the version to the github run number
         projectVersion = "$versionMajor.$versionMinor.$githubRunNumber"
     }
