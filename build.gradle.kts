@@ -106,12 +106,12 @@ tasks {
 
     publishPlugin {
         // use the version from the first build in .github/workflows/build.yml
-        val tmpArchiveFile = project.layout.buildDirectory.file("${project.name}-${project.version}.zip")
+        val tmpArchiveFile = layout.projectDirectory.file("${project.name}-${project.version}.zip")
         val tmpChannel = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
 
         doFirst {
-            println ("archive-file       : ${tmpArchiveFile.get()}")
-            println ("archive-file-exists: ${tmpArchiveFile.get().asFile.exists()}")
+            println ("archive-file       : ${tmpArchiveFile}")
+            println ("archive-file-exists: ${tmpArchiveFile.asFile.exists()}")
             println ("channel            : $tmpChannel")
         }
 
