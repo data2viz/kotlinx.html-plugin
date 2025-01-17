@@ -2,7 +2,7 @@
 name: checks & builds the plugin
 
 permissions:
-  contents: read
+  contents: write
   checks: write
   id-token: write
 
@@ -88,7 +88,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: deploy to Jetbrains marketplace without rebuilding zip file
-        run: ./gradlew -DPUBLISH_TOKEN=${{ env.PUBLISH_TOKEN }} :publishPlugin --exclude-task :signPlugin --exclude-task :buildPlugin --exclude-task :check --exclude-task :patchChangelog
+        run: ./gradlew --info -DPUBLISH_TOKEN=${{ env.PUBLISH_TOKEN }} :publishPlugin --exclude-task :signPlugin --exclude-task :buildPlugin --exclude-task :check --exclude-task :patchChangelog
 
       - name: read pluginVersion from build.gradle
         uses: christian-draeger/read-properties@1.1.1
@@ -104,7 +104,7 @@ jobs:
             github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              ref: 'refs/tags/${{ steps.read_plugin_version.outputs.pluginVersion }}',
+              ref: 'refs/tags/v${{ steps.read_plugin_version.outputs.pluginVersion }}',
               sha: context.sha
             })        
 

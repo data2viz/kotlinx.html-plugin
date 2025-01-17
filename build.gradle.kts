@@ -68,15 +68,6 @@ intellijPlatform {
 //            untilBuild = providers.gradleProperty("pluginUntilBuild")
             untilBuild = provider { null } // unset for the latest IDE version, see: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-p   lugin-extension.html#intellijPlatform-pluginConfiguration-ideaVersion-untilBuild
         }
-    }
-
-    publishing {
-        // set by .github/workflows/build.yml
-        token = providers.systemProperty("PUBLISH_TOKEN")
-        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
-        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
-        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
-        channels = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
 
     }
 
@@ -109,9 +100,28 @@ tasks {
         useJUnit()
     }
 
+    buildPlugin {
+        dependsOn(patchChangelog)
+    }
+
     publishPlugin {
         // use the version from the first build in .github/workflows/build.yml
-        archiveFile.set(layout.projectDirectory.file("${project.name}-${project.version}.zip"))
-        dependsOn(patchChangelog)
+        val tmpArchiveFile = project.layout.buildDirectory.file("${project.name}-${project.version}.zip")
+        val tmpChannel = providers.gradleProperty("pluginVersion").map { listOf(it.substringAfter('-', "").substringBefore('.').ifEmpty { "default" }) }
+
+        doFirst {
+            println ("archive-file       : ${tmpArchiveFile.get()}")
+            println ("archive-file-exists: ${tmpArchiveFile.get().asFile.exists()}")
+            println ("channel            : $tmpChannel")
+        }
+
+        // set by .github/workflows/build.yml
+        token = providers.systemProperty("PUBLISH_TOKEN")
+        // The pluginVersion is based on the SemVer (https://semver.org) and supports pre-release labels, like 2.1.7-alpha.3
+        // Specify pre-release label to publish the plugin in a custom Release Channel automatically. Read more:
+        // https://plugins.jetbrains.com/docs/intellij/deployment.html#specifying-a-release-channel
+        channels = tmpChannel
+
+        archiveFile = tmpArchiveFile
     }
 }
