@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# IntelliJ kotlinx.html-plugin Plugin Changelog
+# Changelog kotlinx.html-plugin 
 
 ## [Unreleased]
 

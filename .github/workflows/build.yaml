@@ -46,11 +46,18 @@ jobs:
       - name: Build Plugin
         run: ./gradlew buildPlugin
 
+      - name: read pluginVersion from build.gradle
+        uses: christian-draeger/read-properties@1.1.1
+        id: read_plugin_version
+        with:
+          path: './gradle.properties'
+          properties: 'pluginVersion'
+
       - name: Upload Plugin Artefact
         uses: actions/upload-artifact@v4
         with:
           name: distribution
-          path: $(ls ./build/distributions/kotlinx.html-plugin-*.zip)
+          path: './build/distributions/kotlinx.html-plugin-${{ steps.read_plugin_version.outputs.pluginVersion }}.zip'
 
   deploy:
     runs-on: ubuntu-latest
